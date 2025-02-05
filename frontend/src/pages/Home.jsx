@@ -1,9 +1,10 @@
-import React from "react";
-
+// import Navbar from "../components/Navbar";
 export const Home = () => {
   return (
-    <div>
-      <h1 className="text-3xl font-bold underline">Hello world!</h1>
-    </div>
+    <>
+      {/* <Navbar /> */}
+      <div className="font-color:red">avndjlb</div>
+      akb
+    </>
   );
 };
