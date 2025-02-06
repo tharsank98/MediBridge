@@ -4,6 +4,8 @@ import { Doctors } from "./pages/Doctors";
 import { Home } from "./pages/Home";
 import { About } from "./pages/About";
 import { Contact } from "./pages/Contact";
+import { Pharmacy } from "./pages/Pharmacy";
+import { Footer } from "./components/Footer";
 
 function App() {
   return (
@@ -13,9 +15,11 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/Doctors" element={<Doctors />} />
+          <Route path="/Pharmacy" element={<Pharmacy />} />
           <Route path="/About" element={<About />} />
           <Route path="/Contact" element={<Contact />} />
         </Routes>
+        <Footer />
       </Router>
     </div>
   );

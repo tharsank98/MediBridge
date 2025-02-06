@@ -2,8 +2,7 @@
 export const Home = () => {
   return (
     <>
-      {/* <Navbar /> */}
-      <div className="font-color:red">avndjlb</div>
+      <div className="text-red-500">avndjlb</div>
       akb
     </>
   );
