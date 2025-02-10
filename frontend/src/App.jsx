@@ -1,4 +1,4 @@
-// import { useState } from "react";
+import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Navbar } from "./components/Navbar";
 import { Doctors } from "./pages/Doctors";
@@ -10,20 +10,20 @@ import { Footer } from "./components/Footer";
 import { MyProfile } from "./pages/MyProfile";
 import { ToastContainer } from "react-toastify";
 import { UserProvider } from "./context/UserContext";
-// import { Login } from "./pages/Login";
+import { Login } from "./pages/Login";
 
 function App() {
-  // const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // const handleLogin = () => {
-  //   setIsLoggedIn(true);
-  // };
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+  };
 
   return (
     <UserProvider>
       <Router>
         <ToastContainer />
-        {/* {isLoggedIn ? (
+        {isLoggedIn ? (
           <>
             <Navbar />
             <Routes>
@@ -38,8 +38,8 @@ function App() {
           </>
         ) : (
           <Login onLogin={handleLogin} />
-        )} */}
-        <Navbar />
+        )}
+        {/* <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/doctors" element={<Doctors />} />
@@ -48,7 +48,7 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/MyProfile" element={<MyProfile />} />
         </Routes>
-        <Footer />
+        <Footer /> */}
       </Router>
     </UserProvider>
   );

@@ -24,15 +24,19 @@ import { toast } from "react-toastify";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
+// Importing the data from the npm package
+import countryData from "dialcode-and-country-data/data/Country_Data.json";
+import countryDialCodes from "dialcode-and-country-data/data/Country_Dialcode.json";
+
 import "react-toastify/dist/ReactToastify.css";
 
 export const MyProfile = () => {
   const [user, setUser] = useState({
     email: "user@example.com",
     phone: "",
+    phoneCode: "",
     city: "",
     country: "",
-    countryCode: "",
     username: "JohnDoe",
     photo: null,
   });
@@ -40,29 +44,25 @@ export const MyProfile = () => {
   const [editMode, setEditMode] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [cityOptions, setCityOptions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const countriesList = Object.keys(countryData);
+  const [countryDataState, setCountryData] = useState({});
+  const [countryDialCodeState, setCountryDialCodes] = useState({});
+  const countriesList = Object.keys(countryDataState);
 
-  const getCountryCode = (country) => {
-    return countryCodes[country] || "";
+  const getCountryDialCode = (country) => {
+    return countryDialCodeState[country] || "";
   };
 
-  const [countryData, setCountryData] = useState({});
-  const [countryCodes, setCountryCodes] = useState({});
-
   useEffect(() => {
-    fetch("/Location/Country_Data.json")
-      .then((response) => response.json())
-      .then((data) => setCountryData(data))
-      .catch((error) => console.error("Error loading country data:", error));
+    setLoading(true);
 
-    fetch("/CountryCode/ConvertedCountryCodes.json")
-      .then((response) => response.json())
-      .then((data) => setCountryCodes(data))
-      .catch((error) => console.error("Error loading country codes:", error));
+    // Simulating data fetching from the npm package (already imported above)
+    setCountryData(countryData);
+    setCountryDialCodes(countryDialCodes);
+    setLoading(false);
   }, []);
-
 
   const profileValidationSchema = Yup.object({
     username: Yup.string()
@@ -73,20 +73,18 @@ export const MyProfile = () => {
       .required("City is required")
       .test("valid-city", "City is not valid for the selected country", function (value) {
         const country = this.parent.country;
-        const countryCities = countryData[country] || [];
+        const countryCities = countryDataState[country] || [];
         return countryCities.includes(value);
       }),
     country: Yup.string()
       .required("Country is required")
       .test("valid-country", "Country is not valid", (value) => countriesList.includes(value)),
+    phoneCode: Yup.string()
+      .required("Phone code is required")
+      .matches(/^\+?[1-9]\d{1,14}$/, "Phone code must be valid"),
     phone: Yup.string()
       .required("Phone number is required")
-      .matches(/^\+?\d+$/, "Phone number must contain only digits and an optional '+' symbol")
-      .test("valid-phone-code", "Phone number must match the selected country's code", function (value) {
-        const country = this.parent.country;
-        const expectedCode = getCountryCode(country);
-        return value.startsWith(expectedCode);
-      }),
+      .matches(/^\d{1,14}$/, "Phone number must be valid"),
   });
 
   const profileFormik = useFormik({
@@ -94,6 +92,7 @@ export const MyProfile = () => {
       username: user.username,
       city: user.city,
       country: user.country,
+      phoneCode: user.phoneCode,
       phone: user.phone,
     },
     validationSchema: profileValidationSchema,
@@ -105,17 +104,17 @@ export const MyProfile = () => {
 
   const handleCountryChange = (e) => {
     const selectedCountry = e.target.value;
-    const newCountryCode = getCountryCode(selectedCountry);
-    const countryCities = countryData[selectedCountry] || [];
+    const newCountryDialCode = getCountryDialCode(selectedCountry);
+    const countryCities = countryDataState[selectedCountry] || [];
 
     setCityOptions(countryCities);
     profileFormik.setFieldValue("country", selectedCountry);
-    profileFormik.setFieldValue("phone", newCountryCode);
+    profileFormik.setFieldValue("phoneCode", newCountryDialCode);
 
     setUser({
       ...user,
       country: selectedCountry,
-      countryCode: newCountryCode,
+      phoneCode: newCountryDialCode,
       city: "",
     });
   };
@@ -142,25 +141,29 @@ export const MyProfile = () => {
       reader.onloadend = () => {
         setUser({ ...user, photo: reader.result });
       };
+      reader.onerror = () => {
+        toast.error("Error uploading photo.");
+      };
       reader.readAsDataURL(file);
     }
   };
+
   useEffect(() => {
-    if (user.country) {
-      const code = countryCodes[user.country] || ""; // Get from embedded object
+    if (user.country && user.phoneCode === '') {
+      const dialCode = countryDialCodeState[user.country] || '';
       setUser((prevUser) => ({
         ...prevUser,
-        countryCode: code,
-        phone: code,
+        phoneCode: dialCode,
       }));
-      profileFormik.setFieldValue("phone", code);
     }
-  }, [user.country, countryCodes, profileFormik]);
+  }, [user.country, countryDialCodeState]);
 
-
+  if (loading) {
+    return <div>Loading...</div>; // A simple loader or a spinner.
+  }
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-gray-100 rounded-lg shadow-2xl transition-transform duration-300 ease-in-out transform hover:scale-105">
+    <div className="max-w-lg mx-auto p-6 bg-gray-100 rounded-lg shadow-2xl">
       {/* Profile Photo */}
       <div className="flex justify-center mb-6 relative">
         <Avatar
@@ -194,6 +197,7 @@ export const MyProfile = () => {
           variant="standard"
           value={user.email}
           InputProps={{ readOnly: true }}
+          disabled
         />
         <TextField
           fullWidth
@@ -238,19 +242,35 @@ export const MyProfile = () => {
           helperText={profileFormik.touched.country && profileFormik.errors.country}
           disabled={!editMode}
         />
-        <TextField
-          fullWidth
-          id="phone"
-          name="phone"
-          label="Phone"
-          variant="standard"
-          value={profileFormik.values.phone}
-          onChange={handlePhoneChange}
-          onBlur={profileFormik.handleBlur}
-          error={profileFormik.touched.phone && Boolean(profileFormik.errors.phone)}
-          helperText={profileFormik.touched.phone && profileFormik.errors.phone}
-          disabled={!editMode}
-        />
+        <div className="flex gap-2">
+          <TextField
+            id="phoneCode"
+            name="phoneCode"
+            label="Phone Code"
+            variant="standard"
+            value={profileFormik.values.phoneCode}
+            InputProps={{ readOnly: true }}
+            onChange={profileFormik.handleChange}
+            onBlur={profileFormik.handleBlur}
+            error={profileFormik.touched.phoneCode && Boolean(profileFormik.errors.phoneCode)}
+            helperText={profileFormik.touched.phoneCode && profileFormik.errors.phoneCode}
+            disabled
+            style={{ width: '100px' }} // Set a fixed width for the phone code input
+          />
+          <TextField
+            fullWidth
+            id="phone"
+            name="phone"
+            label="Phone"
+            variant="standard"
+            value={profileFormik.values.phone}
+            onChange={handlePhoneChange}
+            onBlur={profileFormik.handleBlur}
+            error={profileFormik.touched.phone && Boolean(profileFormik.errors.phone)}
+            helperText={profileFormik.touched.phone && profileFormik.errors.phone}
+            disabled={!editMode}
+          />
+        </div>
         {editMode && (
           <Button variant="contained" color="primary" type="submit" className="w-full mt-4">
             Update Profile
@@ -269,7 +289,6 @@ export const MyProfile = () => {
           <Fab
             color="error"
             onClick={() => {
-
               navigate("/login");
             }}
           >
@@ -296,4 +315,3 @@ export const MyProfile = () => {
     </div>
   );
 };
-
