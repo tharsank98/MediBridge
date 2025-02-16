@@ -7,7 +7,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Fab,
   Tooltip,
   MenuItem,
   Select,
@@ -17,18 +16,18 @@ import {
   IconButton,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
-import EditIcon from "@mui/icons-material/Edit";
-import LogoutIcon from "@mui/icons-material/Logout";
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import { toast } from "react-toastify";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 // Importing the data from the npm package
 import countryData from "dialcode-and-country-data/data/Country_Data.json";
 import countryDialCodes from "dialcode-and-country-data/data/Country_Dialcode.json";
 
 import "react-toastify/dist/ReactToastify.css";
+import ForgotPassword from "./ForgotPassword";
 
 export const MyProfile = () => {
   const [user, setUser] = useState({
@@ -45,7 +44,8 @@ export const MyProfile = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [cityOptions, setCityOptions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [imagePopupOpen, setImagePopupOpen] = useState(false); // State for image popup
+  // const navigate = useNavigate();
 
   const [countryDataState, setCountryData] = useState({});
   const [countryDialCodeState, setCountryDialCodes] = useState({});
@@ -158,6 +158,55 @@ export const MyProfile = () => {
     }
   }, [user.country, countryDialCodeState]);
 
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+  const [forgotPassword, setForgotPassword] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+
+  const passwordValidationSchema = Yup.object({
+    currentPassword: Yup.string().required("Current password is required"),
+    newPassword: Yup.string().min(8, "Password must be at least 8 characters").required("New password is required"),
+    confirmNewPassword: Yup.string().oneOf([Yup.ref('newPassword'), null], "Passwords must match").required("Confirm new password is required"),
+  });
+
+  const passwordFormik = useFormik({
+    initialValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmNewPassword: "",
+    },
+    validationSchema: passwordValidationSchema,
+    onSubmit: (values) => {
+      // Simulate password change
+      if (values.currentPassword === "correctPassword") { // Example check
+        toast.success("Password updated successfully!");
+        setShowPasswordChange(false);
+      } else {
+        toast.error("Current password is incorrect.");
+      }
+    },
+  });
+
+  const handleForgotPasswordSubmit = (values) => {
+    if (otpSent) {
+      if (otp === "123456") { // Example OTP check
+        toast.success("OTP verified successfully!");
+        setForgotPassword(false);
+        setOtpSent(false);
+        setOtp("");
+      } else {
+        toast.error("Invalid OTP. Please try again.");
+      }
+    } else {
+      // Simulate sending OTP
+      toast.success("OTP sent to your email!");
+      setOtpSent(true);
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>; // A simple loader or a spinner.
   }
@@ -170,6 +219,7 @@ export const MyProfile = () => {
           alt={user.username}
           src={user.photo}
           sx={{ width: 120, height: 120 }}
+          onClick={() => setImagePopupOpen(true)} // Open image popup on click
         >
           {!user.photo && <PersonIcon />}
         </Avatar>
@@ -272,28 +322,114 @@ export const MyProfile = () => {
           />
         </div>
         {editMode && (
-          <Button variant="contained" color="primary" type="submit" className="w-full mt-4">
-            Update Profile
-          </Button>
+          <div className="mt-4">
+            <Button variant="contained" color="primary" type="submit" className="w-1/2" sx={{ display: "flex", justifyContent: "center", alignItems: "center", margin: "auto" }}>
+              Update Profile
+            </Button>
+          </div>
         )}
       </form>
 
+      {editMode && (
+        <div className="mt-4">
+          <Button variant="contained" color="secondary" onClick={() => setShowPasswordChange(true)} className="w-1/2" sx={{ display: "flex", justifyContent: "center", alignItems: "center", margin: "auto" }}>
+            Change Password
+          </Button>
+        </div>
+      )}
+
+      {/* Password Change Dialog */}
+      <Dialog open={showPasswordChange} onClose={() => setShowPasswordChange(false)}>
+        <DialogTitle>Change Password</DialogTitle>
+        <DialogContent>
+          <form onSubmit={passwordFormik.handleSubmit}>
+            <TextField
+              fullWidth
+              id="currentPassword"
+              name="currentPassword"
+              label="Current Password"
+              type={showCurrentPassword ? "text" : "password"}
+              value={passwordFormik.values.currentPassword}
+              onChange={passwordFormik.handleChange}
+              onBlur={passwordFormik.handleBlur}
+              sx={{ margin: "1px" }}
+              error={passwordFormik.touched.currentPassword && Boolean(passwordFormik.errors.currentPassword)}
+              helperText={passwordFormik.touched.currentPassword && passwordFormik.errors.currentPassword}
+              InputProps={{
+                endAdornment: (
+                  <IconButton onClick={() => setShowCurrentPassword(!showCurrentPassword)}>
+                    {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                ),
+              }}
+            />
+            <TextField
+              fullWidth
+              id="newPassword"
+              name="newPassword"
+              label="New Password"
+              type={showNewPassword ? "text" : "password"}
+              value={passwordFormik.values.newPassword}
+              onChange={passwordFormik.handleChange}
+              onBlur={passwordFormik.handleBlur}
+              sx={{ margin: "1px" }}
+              error={passwordFormik.touched.newPassword && Boolean(passwordFormik.errors.newPassword)}
+              helperText={passwordFormik.touched.newPassword && passwordFormik.errors.newPassword}
+              InputProps={{
+                endAdornment: (
+                  <IconButton onClick={() => setShowNewPassword(!showNewPassword)}>
+                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                ),
+              }}
+            />
+            <TextField
+              fullWidth
+              id="confirmNewPassword"
+              name="confirmNewPassword"
+              label="Confirm New Password"
+              type={showConfirmNewPassword ? "text" : "password"}
+              value={passwordFormik.values.confirmNewPassword}
+              onChange={passwordFormik.handleChange}
+              onBlur={passwordFormik.handleBlur}
+              sx={{ margin: "1px" }}
+              error={passwordFormik.touched.confirmNewPassword && Boolean(passwordFormik.errors.confirmNewPassword)}
+              helperText={passwordFormik.touched.confirmNewPassword && passwordFormik.errors.confirmNewPassword}
+              InputProps={{
+                endAdornment: (
+                  <IconButton onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}>
+                    {showConfirmNewPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                ),
+              }}
+            />
+            <DialogActions>
+              <Button onClick={() => setForgotPassword(true)} color="primary" style={{ marginRight: 'auto' }}>
+                Forgot Password?
+              </Button>
+
+              <Button type="submit" color="primary">
+                Update Password
+              </Button>
+            </DialogActions>
+          </form>
+
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Popup Dialog */}
+      <Dialog open={imagePopupOpen} onClose={() => setImagePopupOpen(false)}>
+        <DialogContent>
+          <img src={user.photo} alt="Profile" className="w-full h-auto" />
+        </DialogContent>
+      </Dialog>
+
       {/* Circular Buttons */}
-      <div className="flex justify-center gap-4 mt-6">
-        <Tooltip title="Edit Profile">
-          <Fab color="secondary" onClick={() => setEditMode(!editMode)}>
-            <EditIcon />
-          </Fab>
-        </Tooltip>
-        <Tooltip title="Logout">
-          <Fab
-            color="error"
-            onClick={() => {
-              navigate("/login");
-            }}
-          >
-            <LogoutIcon />
-          </Fab>
+      <div className="flex justify-end gap-4 mt-6">
+        <Tooltip title="Edit Profile" >
+          <Button color="secondary" onClick={() => setEditMode(!editMode)} >
+            Edit
+          </Button>
         </Tooltip>
       </div>
 
@@ -312,6 +448,16 @@ export const MyProfile = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Forgot Password Dialog */}
+      <ForgotPassword
+        open={forgotPassword}
+        onClose={() => setForgotPassword(false)}
+        onSubmit={handleForgotPasswordSubmit}
+        otpSent={otpSent}
+        otp={otp}
+        setOtp={setOtp}
+      />
     </div>
   );
 };
