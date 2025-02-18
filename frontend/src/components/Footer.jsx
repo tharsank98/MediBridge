@@ -1,5 +1,4 @@
 import FacebookIcon from "@mui/icons-material/Facebook";
-import TwitterIcon from "@mui/icons-material/Twitter";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 
@@ -9,14 +8,10 @@ export const Footer = () => {
   const socialMediaLinks = [
     {
       icon: <FacebookIcon />,
-      url: "https://www.facebook.com",
+      url: "https://www.facebook.com/profile.php?id=61573089486848",
       label: "Facebook",
     },
-    {
-      icon: <TwitterIcon />,
-      url: "https://twitter.com",
-      label: "Twitter",
-    },
+
     {
       icon: <InstagramIcon />,
       url: "https://www.instagram.com",
@@ -42,8 +37,8 @@ export const Footer = () => {
           </div>
           <div>
             <h3 className="text-xl font-bold mb-4">Contact Us</h3>
-            <p className="text-sm text-gray-300">support@medibridge.com</p>
-            <p className="text-sm text-gray-300">+1 234 567 890</p>
+            <p className="text-sm text-gray-300">medibridgeDev@gmail.com</p>
+            <p className="text-sm text-gray-300">+94 76 866 9760</p>
           </div>
           <div>
             <h3 className="text-xl font-bold mb-4">Follow Us</h3>

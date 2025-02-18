@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Navbar } from "./components/Navbar";
 import { Doctors } from "./pages/Doctors";
 import { Home } from "./pages/Home";
-import { About } from "./pages/About";
 import { Contact } from "./pages/Contact";
 import { Pharmacy } from "./pages/Pharmacy";
 import { Footer } from "./components/Footer";
@@ -17,7 +16,7 @@ function App() {
   return (
     <UserProvider>
       <Router>
-        <ToastContainer />
+        <ToastContainer position="bottom-right" />
         <AppContent />
       </Router>
     </UserProvider>
@@ -34,7 +33,6 @@ const AppContent = () => {
         <Route path="/" element={<ProtectedRoute element={<Home />} />} />
         <Route path="/doctors" element={<ProtectedRoute element={<Doctors />} />} />
         <Route path="/pharmacy" element={<ProtectedRoute element={<Pharmacy />} />} />
-        <Route path="/about" element={<ProtectedRoute element={<About />} />} />
         <Route path="/contact" element={<ProtectedRoute element={<Contact />} />} />
         <Route path="/myprofile" element={<ProtectedRoute element={<MyProfile />} />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

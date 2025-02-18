@@ -125,7 +125,7 @@ export function Login() {
   return (
     <div className="flex justify-center items-center min-h-screen bg-cover bg-center">
       <div className="bg-white bg-opacity-30 p-6 rounded-2xl shadow-lg w-full max-w-4xl pt-10 flex flex-col md:flex-row">
-        <div className={`w-1/2 ${isLogin ? 'order-2' : 'order-1'}`}>
+        <div className={`w-full md:w-1/2 ${isLogin ? 'order-2' : 'order-1'}`}>
           <div className="flex justify-center mb-4">
             {isLogin ? (
               <img src="/assets/MediBridge_logo.png" alt="Logo" className="w-24" />
@@ -392,7 +392,7 @@ export function Login() {
             )}
           </form>
         </div>
-        <div className={`w-1/2 ${isLogin ? 'order-1' : 'order-2'} flex justify-center items-center ml-3 mr-3`}>
+        <div className={`hidden md:flex w-1/2 ${isLogin ? 'order-1' : 'order-2'} justify-center items-center ml-3 mr-3`}>
           <img
             src="/assets/doctor.jpg"
             alt="Side"

@@ -75,11 +75,7 @@ export const Navbar = () => {
                     Pharmacy
                   </Link>
                 </li>
-                <li>
-                  <Link to="/About" className="py-2 px-4 hover:bg-blue-700 rounded cursor-pointer">
-                    About
-                  </Link>
-                </li>
+
                 <li>
                   <Link to="/Contact" className="py-2 px-4 hover:bg-blue-700 rounded cursor-pointer">
                     Contact
@@ -144,9 +140,7 @@ export const Navbar = () => {
               <li className="my-4 py-4 border-b border-slate-800 hover:bg-blue-700 hover:rounded cursor-pointer">
                 <Link to="/Pharmacy" onClick={() => setClick(false)}>Pharmacy</Link>
               </li>
-              <li className="my-4 py-4 border-b border-slate-800 hover:bg-blue-700 hover:rounded cursor-pointer">
-                <Link to="/About" onClick={() => setClick(false)}>About</Link>
-              </li>
+
               <li className="my-4 py-4 border-b border-slate-800 hover:bg-blue-700 hover:rounded cursor-pointer">
                 <Link to="/Contact" onClick={() => setClick(false)}>Contact</Link>
               </li>
