@@ -9,6 +9,15 @@ export default {
       gridTemplateColumns: {
         auto: "repeat(auto-fill,minmax(200px,1fr))",
       },
+      keyframes: {
+        arrowMove: {
+          "0%, 100%": { transform: "translateX(0)" },
+          "50%": { transform: "translateX(5px)" },
+        },
+      },
+      animation: {
+        arrowMove: "arrowMove 1s infinite",
+      },
     },
   },
   plugins: [],

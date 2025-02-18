@@ -1,9 +1,10 @@
-// import Navbar from "../components/Navbar";
+import { Header } from "../components/Header";
+import { HeaderPharmacy } from "../components/HeaderPharmacy";
 export const Home = () => {
   return (
     <>
-      <div className="text-red-500">avndjlb</div>
-      akb
+      <Header />
+      <HeaderPharmacy />
     </>
   );
 };

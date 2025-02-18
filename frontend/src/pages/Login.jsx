@@ -1,239 +1,405 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";  // Import useNavigate
-import { Card, CardContent, TextField, Button, MenuItem, Select, IconButton, InputLabel, FormControl, Input } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
+import PersonIcon from '@mui/icons-material/Person'; // Import PersonIcon
+import { motion } from "framer-motion";
+import * as yup from "yup";
+import { useFormik } from "formik";
+import countryData from "dialcode-and-country-data/data/Country_Data.json";
+import countryDialCodes from "dialcode-and-country-data/data/Country_Dialcode.json";
 
 export function Login() {
-  const navigate = useNavigate();  // Initialize the navigate function
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "demo@gmail.com",
-    password: "123456789SK",
-    confirmPassword: "",
-    mobile: "",
-    country: "",
-    countryCode: "",
-    location: "",
-    photo: null,
-  });
-
-  const [countries, setCountries] = useState([]);
-  const [cities, setCities] = useState([]);
-  const [countryData, setCountryData] = useState({});
-  const [countryCodes, setCountryCodes] = useState({});
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
+  const [countries] = useState(Object.keys(countryData));
+  const [cities, setCities] = useState([]);
+  const [countryCode, setCountryCode] = useState("");
+  const [existingUsernames, setExistingUsernames] = useState([]); // Remove example existing usernames
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
 
-  // Load country data from JSON files
-  useEffect(() => {
-    fetch("/Location/Country_Data.json")
-      .then((res) => res.json())
-      .then((data) => {
-        setCountryData(data);
-        setCountries(Object.keys(data)); // Set available countries
-      })
-      .catch((error) => console.error("Error loading country data:", error));
+  const validationSchema = yup.object({
+    name: yup.string().test({
+      name: "required-if-signup",
+      test: function (value) {
+        return isLogin || !!value || this.createError({ message: "Full Name is required" });
+      },
+    }),
+    username: yup.string().test({
+      name: "required-if-signup",
+      test: function (value) {
+        return isLogin || !!value || this.createError({ message: "Username is required" });
+      },
+    }),
+    email: yup.string().email("Invalid email").required("Email is required"),
+    password: yup.string().min(8, "Password must be at least 8 characters").required("Password is required"),
+    confirmPassword: yup.string().test({
+      name: "password-match",
+      test: function (value) {
+        return isLogin || (value === this.parent.password) || this.createError({ message: "Passwords must match" });
+      },
+    }),
+    country: yup.string().test({
+      name: "required-if-signup",
+      test: function (value) {
+        return isLogin || !!value || this.createError({ message: "Country is required" });
+      },
+    }),
+    city: yup.string().test({
+      name: "required-if-signup",
+      test: function (value) {
+        return isLogin || !!value || this.createError({ message: "City is required" });
+      },
+    }),
+    phone: yup.string().test({
+      name: "required-if-signup",
+      test: function (value) {
+        return isLogin || !!value || this.createError({ message: "Phone number is required" });
+      },
+    }),
+  });
 
-    fetch("/CountryCode/ConvertedCountryCodes.json")
-      .then((res) => res.json())
-      .then((data) => setCountryCodes(data))
-      .catch((error) => console.error("Error loading country codes:", error));
-  }, []);
-
-  // Update cities & country code when a country is selected
-  useEffect(() => {
-    if (formData.country && countryData[formData.country]) {
-      const newCode = countryCodes[formData.country] || "";
-      setCities(countryData[formData.country]); // Set correct cities
-      setFormData((prev) => ({
-        ...prev,
-        countryCode: newCode,
-        mobile: newCode, // Auto-fill country code in mobile number
-        location: countryData[formData.country][0] || "", // Set first city as default
-      }));
-    }
-  }, [formData.country, countryData, countryCodes]);
-
-  // Handle input changes
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  // Handle profile photo upload
-  const handlePhotoChange = (e) => {
-    setFormData({ ...formData, photo: e.target.files[0] });
-  };
-
-  // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!isLogin) {
-      if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword || !formData.location) {
-        toast.error("All fields are required!");
-        return;
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      country: "",
+      city: "",
+      phone: "",
+    },
+    validationSchema,
+    onSubmit: (values) => {
+      if (isForgotPassword) {
+        if (otpSent) {
+          if (otp === "123456") { // Example OTP check
+            toast.success("OTP verified successfully!");
+            setIsForgotPassword(false);
+            setOtpSent(false);
+            setOtp("");
+          } else {
+            toast.error("Invalid OTP. Please try again.");
+          }
+        } else {
+          // Simulate sending OTP
+          toast.success("OTP sent to your email!");
+          setOtpSent(true);
+        }
+      } else {
+        toast.success(isLogin ? "Logged in successfully!" : "Signed up successfully!");
+        if (isLogin) {
+          navigate("/");
+        }
       }
-      if (formData.password !== formData.confirmPassword) {
-        toast.error("Passwords do not match!");
-        return;
-      }
+    },
+  });
+
+  useEffect(() => {
+    if (formik.values.country) {
+      setCities(countryData[formik.values.country] || []);
+      setCountryCode(countryDialCodes[formik.values.country] || "");
+      formik.setFieldValue("phone", countryDialCodes[formik.values.country] || "");
     }
+  }, [formik.values.country]);
 
-    toast.success(isLogin ? "Logged in successfully!" : "Signed up successfully!");
-
-    // Redirect user to another page after successful login
-    if (isLogin) {
-      navigate(""); // Redirect to dashboard or another page
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   return (
-    <div className="flex justify-center items-center h-screen">
-      <Card sx={{ width: 400, padding: 3, boxShadow: 3 }}>
-        <CardContent>
-          <h2 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "16px" }}>
-            {isLogin ? "Login" : "Sign Up"}
-          </h2>
-          <form onSubmit={handleSubmit}>
-            {!isLogin && (
-              <>
-                <TextField
-                  label="Full Name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  fullWidth
-                  margin="normal"
-                  required
-                />
-
-                <FormControl fullWidth margin="normal">
-                  <InputLabel id="country-label">Country</InputLabel>
-                  <Select
-                    labelId="country-label"
-                    id="country"
-                    name="country"
-                    value={formData.country}
-                    label="Country"
-                    onChange={handleChange}
-                    required
-                  >
-                    {countries.map((country) => (
-                      <MenuItem key={country} value={country}>
-                        {country}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <div style={{ display: "flex", gap: "16px", marginBottom: "16px" }}>
-                  <TextField
-                    label="Mobile Number"
-                    name="mobile"
-                    value={formData.mobile}
-                    onChange={handleChange}
-                    fullWidth
-                    margin="normal"
-                    required
+    <div className="flex justify-center items-center min-h-screen bg-cover bg-center">
+      <div className="bg-white bg-opacity-30 p-6 rounded-2xl shadow-lg w-full max-w-4xl pt-10 flex flex-col md:flex-row">
+        <div className={`w-full md:w-1/2 ${isLogin ? 'order-2' : 'order-1'}`}>
+          <div className="flex justify-center mb-4">
+            {isLogin ? (
+              <img src="/assets/MediBridge_logo.png" alt="Logo" className="w-24" />
+            ) : (
+              <div className="flex flex-col items-center">
+                {profileImage ? (
+                  <img
+                    src={profileImage}
+                    alt="Profile"
+                    className="w-24 h-24 rounded-full mb-2"
                   />
-                </div>
+                ) : (
+                  <PersonIcon fontSize="large" className="mb-2" />
+                )}
+                <label htmlFor="upload-photo" className="cursor-pointer">
+                  <AddAPhotoIcon fontSize="large" />
+                </label>
+                <input
+                  type="file"
+                  id="upload-photo"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+              </div>
+            )}
+          </div>
+          <h2 className="text-xl font-bold text-center mb-4">
+            {isForgotPassword ? "Forgot Password" : isLogin ? "Login" : "Sign Up"}
+          </h2>
+          <form onSubmit={formik.handleSubmit} className="space-y-4">
+            {isForgotPassword ? (
+              <>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                  {...formik.getFieldProps("email")}
+                  className="w-full p-2 border rounded-lg"
+                />
+                {formik.touched.email && formik.errors.email ? (
+                  <div className="text-red-500 text-sm">{formik.errors.email}</div>
+                ) : null}
+                {otpSent && (
+                  <input
+                    type="text"
+                    name="otp"
+                    placeholder="Enter OTP"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    className="w-full p-2 border rounded-lg"
+                  />
+                )}
+                <motion.button
+                  type="submit"
+                  className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {otpSent ? "Verify OTP" : "Send OTP"}
+                </motion.button>
+              </>
+            ) : (
+              <>
+                {!isLogin && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-4">
+                      <input
+                        type="text"
+                        name="name"
+                        placeholder="Full Name"
+                        {...formik.getFieldProps("name")}
+                        className="w-full p-2 border rounded-lg"
+                      />
+                      {formik.touched.name && formik.errors.name ? (
+                        <div className="text-red-500 text-sm">{formik.errors.name}</div>
+                      ) : null}
+                      <select
+                        name="country"
+                        {...formik.getFieldProps("country")}
+                        className="w-full p-2 border rounded-lg"
+                      >
+                        <option value="">Select Country</option>
+                        {countries.map((country) => (
+                          <option key={country} value={country}>
+                            {country}
+                          </option>
+                        ))}
+                      </select>
+                      {formik.touched.country && formik.errors.country ? (
+                        <div className="text-red-500 text-sm">{formik.errors.country}</div>
+                      ) : null}
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder="Email"
+                        {...formik.getFieldProps("email")}
+                        className="w-full p-2 border rounded-lg"
+                      />
+                      {formik.touched.email && formik.errors.email ? (
+                        <div className="text-red-500 text-sm">{formik.errors.email}</div>
+                      ) : null}
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          placeholder="Password"
+                          {...formik.getFieldProps("password")}
+                          className="w-full p-2 border rounded-lg"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-2 top-2"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </button>
+                        {formik.touched.password && formik.errors.password ? (
+                          <div className="text-red-500 text-sm">{formik.errors.password}</div>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <input
+                        type="text"
+                        name="username"
+                        placeholder="Username"
+                        {...formik.getFieldProps("username")}
+                        className="w-full p-2 border rounded-lg"
+                      />
+                      {formik.touched.username && formik.errors.username ? (
+                        <div className="text-red-500 text-sm">{formik.errors.username}</div>
+                      ) : null}
+                      <select
+                        name="city"
+                        {...formik.getFieldProps("city")}
+                        className="w-full p-2 border rounded-lg"
+                      >
+                        <option value="">Select City</option>
+                        {cities.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      </select>
+                      {formik.touched.city && formik.errors.city ? (
+                        <div className="text-red-500 text-sm">{formik.errors.city}</div>
+                      ) : null}
+                      <input
+                        type="text"
+                        name="phone"
+                        placeholder="Phone Number"
+                        {...formik.getFieldProps("phone")}
+                        className="w-full p-2 border rounded-lg"
+                        value={formik.values.phone}
+                        onChange={(e) =>
+                          formik.setFieldValue(
+                            "phone",
+                            `${countryCode}${e.target.value.replace(countryCode, "").trim()}`
+                          )
+                        }
+                      />
+                      {formik.touched.phone && formik.errors.phone ? (
+                        <div className="text-red-500 text-sm">{formik.errors.phone}</div>
+                      ) : null}
+                      <div className="relative">
+                        <input
+                          type={showConfirmPassword ? "text" : "password"}
+                          name="confirmPassword"
+                          placeholder="Confirm Password"
+                          {...formik.getFieldProps("confirmPassword")}
+                          className="w-full p-2 border rounded-lg"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-2 top-2"
+                        >
+                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                        </button>
+                        {formik.touched.confirmPassword && formik.errors.confirmPassword ? (
+                          <div className="text-red-500 text-sm">{formik.errors.confirmPassword}</div>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {isLogin && (
+                  <div className="space-y-4">
+                    <div className="flex justify-center w-full">
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder="Email"
+                        {...formik.getFieldProps("email")}
+                        className="w-full p-2 border rounded-lg"
+                      />
+                    </div>
+                    {formik.touched.email && formik.errors.email ? (
+                      <div className="text-red-500 text-sm text-center">{formik.errors.email}</div>
+                    ) : null}
+                    <div className="flex justify-center w-full relative">
+                      <div className="relative w-full">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          placeholder="Password"
+                          {...formik.getFieldProps("password")}
+                          className="w-full p-2 border rounded-lg"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-2 top-2"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </button>
+                      </div>
+                    </div>
+                    {formik.touched.password && formik.errors.password ? (
+                      <div className="text-red-500 text-sm text-center">{formik.errors.password}</div>
+                    ) : null}
+                  </div>
+                )}
 
-                <FormControl fullWidth margin="normal">
-                  <InputLabel id="location-label">Location</InputLabel>
-                  <Select
-                    labelId="location-label"
-                    id="location"
-                    name="location"
-                    value={formData.location}
-                    label="Location"
-                    onChange={handleChange}
-                    required
+                <div className="flex justify-center">
+                  <motion.button
+                    type="submit"
+                    className="w-1/4 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    {cities.map((city) => (
-                      <MenuItem key={city} value={city}>
-                        {city}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <div style={{ marginBottom: "16px" }}>
-                  <label htmlFor="photo-upload" style={{ display: "block", marginBottom: "8px" }}>
-                    Upload Profile Photo (Optional)
-                  </label>
-                  <Input id="photo-upload" type="file" onChange={handlePhotoChange} fullWidth />
+                    {isLogin ? "Login" : "Sign Up"}
+                  </motion.button>
                 </div>
+                <p className="text-center text-sm mt-4">
+                  {isLogin ? (
+                    <>
+                      Don&apos;t have an account?{" "}
+                      <span className="text-blue-500 cursor-pointer" onClick={() => setIsLogin(false)}>
+                        Sign up
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      Already have an account?{" "}
+                      <span className="text-blue-500 cursor-pointer" onClick={() => setIsLogin(true)}>
+                        Login
+                      </span>
+                    </>
+                  )}
+                </p>
+                {isLogin && (
+                  <p className="text-center text-sm mt-4">
+                    <span
+                      className="text-blue-500 cursor-pointer"
+                      onClick={() => setIsForgotPassword(true)}
+                    >
+                      Forgot Password?
+                    </span>
+                  </p>
+                )}
               </>
             )}
-
-            <TextField
-              label="Email"
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              fullWidth
-              margin="normal"
-              required
-            />
-            <TextField
-              label="Password"
-              type={showPassword ? "text" : "password"}
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              fullWidth
-              margin="normal"
-              required
-              InputProps={{
-                endAdornment: (
-                  <IconButton
-                    onClick={() => setShowPassword(!showPassword)}  // Toggle password visibility
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                ),
-              }}
-            />
-            {!isLogin && (
-              <TextField
-                label="Confirm Password"
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                fullWidth
-                margin="normal"
-                required
-                InputProps={{
-                  endAdornment: (
-                    <IconButton
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}  // Toggle confirm password visibility
-                      edge="end"
-                    >
-                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  ),
-                }}
-              />
-            )}
-            <Button type="submit" variant="contained" fullWidth sx={{ marginTop: 2 }}>
-              {isLogin ? "Login" : "Sign Up"}
-            </Button>
           </form>
-          <p style={{ textAlign: "center", fontSize: "14px", marginTop: "16px" }}>
-            {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-            <span style={{ color: "#1976d2", cursor: "pointer" }} onClick={() => setIsLogin(!isLogin)}>
-              {isLogin ? "Sign up" : "Login"}
-            </span>
-          </p>
-        </CardContent>
-      </Card>
+        </div>
+        <div className={`hidden md:flex w-1/2 ${isLogin ? 'order-1' : 'order-2'} justify-center items-center ml-3 mr-3`}>
+          <img
+            src="/assets/doctor.jpg"
+            alt="Side"
+            className={`w-full h-full object-cover border-2 border-black rounded-xl m-[5px] ${isLogin ? 'transform scale-x-[-1]' : ''}`}
+          />
+        </div>
+      </div>
     </div>
   );
 }

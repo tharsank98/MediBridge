@@ -14,11 +14,11 @@
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.4.2",
     "@mui/material": "^6.4.3",
-    "all-countries-and-cities-json": "^1.0.0",
     "aos": "^3.0.0-beta.6",
-    "cities.json": "^1.1.45",
-    "country-code-flag-phone-extension-json": "^1.0.2",
+    "dialcode-and-country-data": "^1.0.2",
+    "emailjs-com": "^3.2.0",
     "formik": "^2.4.6",
+    "framer-motion": "^12.4.2",
     "papaparse": "^5.5.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -36,6 +36,7 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
+    "json-server": "^1.0.0-beta.3",
     "vite": "^6.0.5"
   }
 }
