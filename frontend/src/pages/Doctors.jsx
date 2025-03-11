@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardActions, Typography, Button, MenuItem, Select, InputLabel, FormControl, AppBar, Toolbar } from "@mui/material";
+import { Card, CardContent, CardActions, Typography, Button, MenuItem, Select, InputLabel, FormControl } from "@mui/material";
 import { TextField } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import countryData from "dialcode-and-country-data/data/Country_Data.json";
@@ -21,7 +20,6 @@ export const Doctors = () => {
   const [location, setLocation] = useState("");
   const [specialization, setSpecialization] = useState("");
   const [locations, setLocations] = useState([]);
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (country) {
@@ -41,20 +39,11 @@ export const Doctors = () => {
       (specialization === "" || doctor.specialization === specialization)
   );
 
-  const handleConsultClick = (doctor) => {
-    navigate('/ConsultationPage', { state: { doctor } });
-  };
-
   return (
     <div style={{ padding: "24px" }}>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" style={{ flexGrow: 1 }}>
-            Find Doctor
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <br />
+      <Typography variant="h5" gutterBottom>
+        Find Doctors
+      </Typography>
       <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "16px" }}>
         <FormControl style={{ flex: 1, minWidth: "200px" }}>
           <InputLabel>Country</InputLabel>
@@ -102,7 +91,7 @@ export const Doctors = () => {
               <Typography color="textSecondary">{doctor.location}</Typography>
             </CardContent>
             <CardActions>
-              <Button variant="contained" color="primary" endIcon={<ArrowForwardIcon />} onClick={() => handleConsultClick(doctor)}>
+              <Button variant="contained" color="primary" endIcon={<ArrowForwardIcon />}>
                 Consult
               </Button>
             </CardActions>
