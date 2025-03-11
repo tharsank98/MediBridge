@@ -10,6 +10,8 @@ import jwt from "jsonwebtoken"
 const addDoctor = async(req,res)=>{
     try{
       const{name, email, password, speciality, degree,experience, about , fees , address} = req.body
+      console.log({name, email, password, speciality, degree,experience, about , fees , address});
+      
       const imageFile = req.file
 
       //checking for all data add doctor 
