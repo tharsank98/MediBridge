@@ -1,6 +1,6 @@
 
 export const Appointment = () => {
   return (
-    <div>Appointment</div>
+    <div>Appointmentss</div>
   )
 }
