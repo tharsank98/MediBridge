@@ -3,7 +3,8 @@ import { Navbar } from "./components/Navbar";
 import { Doctors } from "./pages/Doctors";
 import { Home } from "./pages/Home";
 import { Contact } from "./pages/Contact";
-import { Pharmacy } from "./pages/Pharmacy";
+import { PharmacySelection } from "./pages/PharmacySelection";
+import { MedicinesList } from "./pages/MedicinesList";
 import { Footer } from "./components/Footer";
 import { MyProfile } from "./pages/MyProfile";
 import { ToastContainer } from "react-toastify";
@@ -32,7 +33,8 @@ const AppContent = () => {
       <Routes>
         <Route path="/" element={<ProtectedRoute element={<Home />} />} />
         <Route path="/doctors" element={<ProtectedRoute element={<Doctors />} />} />
-        <Route path="/pharmacy" element={<ProtectedRoute element={<Pharmacy />} />} />
+        <Route path="/pharmacy" element={<PharmacySelection />} />
+        <Route path="/pharmacy/:pharmacyName" element={<MedicinesList />} />
         <Route path="/contact" element={<ProtectedRoute element={<Contact />} />} />
         <Route path="/myprofile" element={<ProtectedRoute element={<MyProfile />} />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
