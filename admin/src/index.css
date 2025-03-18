@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+::-webkit-scrollbar {
+    display: none; /* For Chrome, Safari, and Opera */
+}
+
+/* For Firefox */
+* {
+    scrollbar-width: none;
+}
+
+/* For Internet Explorer/Edge */
+*::-ms-scrollbar {
+    display: none;
+}
