@@ -9,8 +9,8 @@ const doctorSchema = new mongoose.Schema(
     speciality: { type: String, required: true },
     degree: { type: String, required: true },
     experience: { type: String, required: true },
-    about: { type: String, required: true }, 
-    available: { type: Boolean, default : true},
+    about: { type: String, required: true },
+    available: { type: Boolean, default: true },
     fees: { type: Number, required: true },
     address: { type: Object, required: true },
     date: { type: Number, required: true },
@@ -19,7 +19,7 @@ const doctorSchema = new mongoose.Schema(
   { minimize: false }
 );
 
-const docterModel =
-  mongoose.models.doctor || mongoose.model("doctor", doctorSchema);
+// Ensuring the model is reused if already defined (prevents overwrite errors in dev)
+const doctorModel = mongoose.models.doctor || mongoose.model("doctor", doctorSchema);
 
-export default docterModel;
+export default doctorModel;
