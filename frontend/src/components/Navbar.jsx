@@ -5,7 +5,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
 
-const Logo = "/assets/MediBridge_logo.png"; // Logo from public folder
+const Logo = "/assets/MediBridge_logo.png"; 
 
 export const Navbar = () => {
   const [click, setClick] = useState(false);
@@ -29,7 +29,6 @@ export const Navbar = () => {
     setProfileDropdown(false);
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {

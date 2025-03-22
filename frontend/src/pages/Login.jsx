@@ -96,18 +96,16 @@ export function Login() {
           }
         } else {
           if (isLogin) {
-            // Call login API
             const response = await userLogin({
               email: values.email,
               password: values.password,
             });
             toast.success("Logged in successfully!");
-            navigate("/"); // Redirect to home page
+            navigate("/"); 
           } else {
-            // Call signup API
             const response = await registerUser(values);
             toast.success("Signed up successfully!");
-            setIsLogin(true); // Switch to login mode after signup
+            setIsLogin(true);
           }
         }
       } catch (error) {

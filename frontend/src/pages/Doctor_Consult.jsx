@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export const DoctorConsult = () => {
-    const { doctorName } = useParams(); // Get doctor name from route params
+    const { doctorName } = useParams(); 
     const [patientName, setPatientName] = useState("");
     const [phone, setPhone] = useState("");
     const [email, setEmail] = useState("");
@@ -18,7 +18,6 @@ export const DoctorConsult = () => {
 
         toast.success("Your consultation request has been submitted.");
 
-        // Reset form without refreshing
         setPatientName("");
         setPhone("");
         setEmail("");
