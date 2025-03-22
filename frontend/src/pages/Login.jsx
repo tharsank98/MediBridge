@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
-import PersonIcon from '@mui/icons-material/Person'; // Import PersonIcon
+import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
+import PersonIcon from "@mui/icons-material/Person";
 import { motion } from "framer-motion";
 import * as yup from "yup";
 import { useFormik } from "formik";
 import countryData from "dialcode-and-country-data/data/Country_Data.json";
 import countryDialCodes from "dialcode-and-country-data/data/Country_Dialcode.json";
+import { userLogin, registerUser } from "../api/axiosInstance";
 
 export function Login() {
   const navigate = useNavigate();
@@ -20,7 +21,6 @@ export function Login() {
   const [countries] = useState(Object.keys(countryData));
   const [cities, setCities] = useState([]);
   const [countryCode, setCountryCode] = useState("");
-  const [existingUsernames, setExistingUsernames] = useState([]); // Remove example existing usernames
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
@@ -78,27 +78,40 @@ export function Login() {
       phone: "",
     },
     validationSchema,
-    onSubmit: (values) => {
-      if (isForgotPassword) {
-        if (otpSent) {
-          if (otp === "123456") { // Example OTP check
-            toast.success("OTP verified successfully!");
-            setIsForgotPassword(false);
-            setOtpSent(false);
-            setOtp("");
+    onSubmit: async (values) => {
+      try {
+        if (isForgotPassword) {
+          if (otpSent) {
+            if (otp === "123456") {
+              toast.success("OTP verified successfully!");
+              setIsForgotPassword(false);
+              setOtpSent(false);
+              setOtp("");
+            } else {
+              toast.error("Invalid OTP. Please try again.");
+            }
           } else {
-            toast.error("Invalid OTP. Please try again.");
+            toast.success("OTP sent to your email!");
+            setOtpSent(true);
           }
         } else {
-          // Simulate sending OTP
-          toast.success("OTP sent to your email!");
-          setOtpSent(true);
+          if (isLogin) {
+            // Call login API
+            const response = await userLogin({
+              email: values.email,
+              password: values.password,
+            });
+            toast.success("Logged in successfully!");
+            navigate("/"); // Redirect to home page
+          } else {
+            // Call signup API
+            const response = await registerUser(values);
+            toast.success("Signed up successfully!");
+            setIsLogin(true); // Switch to login mode after signup
+          }
         }
-      } else {
-        toast.success(isLogin ? "Logged in successfully!" : "Signed up successfully!");
-        if (isLogin) {
-          navigate("/");
-        }
+      } catch (error) {
+        toast.error(error.response?.data?.message || "An error occurred. Please try again.");
       }
     },
   });
@@ -125,18 +138,14 @@ export function Login() {
   return (
     <div className="flex justify-center items-center min-h-screen bg-cover bg-center">
       <div className="bg-white bg-opacity-30 p-6 rounded-2xl shadow-lg w-full max-w-4xl pt-10 flex flex-col md:flex-row">
-        <div className={`w-full md:w-1/2 ${isLogin ? 'order-2' : 'order-1'}`}>
+        <div className={`w-full md:w-1/2 ${isLogin ? "order-2" : "order-1"}`}>
           <div className="flex justify-center mb-4">
             {isLogin ? (
               <img src="/assets/MediBridge_logo.png" alt="Logo" className="w-24" />
             ) : (
               <div className="flex flex-col items-center">
                 {profileImage ? (
-                  <img
-                    src={profileImage}
-                    alt="Profile"
-                    className="w-24 h-24 rounded-full mb-2"
-                  />
+                  <img src={profileImage} alt="Profile" className="w-24 h-24 rounded-full mb-2" />
                 ) : (
                   <PersonIcon fontSize="large" className="mb-2" />
                 )}
@@ -354,7 +363,7 @@ export function Login() {
                 <div className="flex justify-center">
                   <motion.button
                     type="submit"
-                    className="w-1/4 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
+                    className="w-1/4 bg-[#3cbece] text-white py-2 rounded-lg hover:bg-blue-600 transition"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -392,11 +401,12 @@ export function Login() {
             )}
           </form>
         </div>
-        <div className={`hidden md:flex w-1/2 ${isLogin ? 'order-1' : 'order-2'} justify-center items-center ml-3 mr-3`}>
+        <div className={`hidden md:flex w-1/2 ${isLogin ? "order-1" : "order-2"} justify-center items-center ml-3 mr-3`}>
           <img
             src="/assets/doctor.jpg"
             alt="Side"
-            className={`w-full h-full object-cover border-2 border-black rounded-xl m-[5px] ${isLogin ? 'transform scale-x-[-1]' : ''}`}
+            className={`w-full h-full object-cover border-2 border-black rounded-xl m-[5px] ${isLogin ? "transform scale-x-[-1]" : ""
+              }`}
           />
         </div>
       </div>

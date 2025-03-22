@@ -1,18 +1,9 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardActions, Typography, Button, MenuItem, Select, InputLabel, FormControl } from "@mui/material";
+import { Card, CardContent, CardActions, Typography, Button, MenuItem, Select, InputLabel, FormControl, CircularProgress } from "@mui/material";
 import { TextField } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import axios from "../api/axiosInstance";
 import countryData from "dialcode-and-country-data/data/Country_Data.json";
-
-const doctors = [
-  { name: "Dr. John Doe", specialization: "Cardiologist", hospital: "City Hospital", location: "Colombo", country: "Sri Lanka", image: "https://via.placeholder.com/150" },
-  { name: "Dr. Sarah Smith", specialization: "Dentist", hospital: "Sunrise Clinic", location: "Kandy", country: "Sri Lanka", image: "https://via.placeholder.com/150" },
-  { name: "Dr. Emily Johnson", specialization: "Diabetics", hospital: "Green Valley Hospital", location: "Galle", country: "Sri Lanka", image: "https://via.placeholder.com/150" },
-  { name: "Dr. James Brown", specialization: "Neurologist", hospital: "City Hospital", location: "Colombo", country: "Sri Lanka", image: "https://via.placeholder.com/150" },
-  { name: "Dr. Michael Lee", specialization: "Pediatrician", hospital: "Sunrise Clinic", location: "Jaffna", country: "Sri Lanka", image: "https://via.placeholder.com/150" },
-];
-
-const specializations = ["Cardiologist", "Dentist", "Diabetics", "Neurologist", "Pediatrician"];
 
 export const Doctors = () => {
   const [search, setSearch] = useState("");
@@ -20,7 +11,27 @@ export const Doctors = () => {
   const [location, setLocation] = useState("");
   const [specialization, setSpecialization] = useState("");
   const [locations, setLocations] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // Fetch doctors from backend API
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const response = await axios.get("/api/doctor/list");
+        setDoctors(response.data);
+      } catch (error) {
+        setError("Failed to fetch doctors. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
+
+  // Update locations when country changes
   useEffect(() => {
     if (country) {
       setLocations(countryData[country] || []);
@@ -29,6 +40,7 @@ export const Doctors = () => {
     }
   }, [country]);
 
+  // Filter doctors based on search and filters
   const filteredDoctors = doctors.filter(
     (doctor) =>
       (doctor.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -44,6 +56,8 @@ export const Doctors = () => {
       <Typography variant="h5" gutterBottom>
         Find Doctors
       </Typography>
+
+      {/* Filters */}
       <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "16px" }}>
         <FormControl style={{ flex: 1, minWidth: "200px" }}>
           <InputLabel>Country</InputLabel>
@@ -74,14 +88,22 @@ export const Doctors = () => {
           <InputLabel>Specialization</InputLabel>
           <Select value={specialization} onChange={(e) => setSpecialization(e.target.value)}>
             <MenuItem value="">All Specializations</MenuItem>
-            {specializations.map((spec) => (
+            {["Cardiologist", "Dentist", "Diabetics", "Neurologist", "Pediatrician"].map((spec) => (
               <MenuItem key={spec} value={spec}>{spec}</MenuItem>
             ))}
           </Select>
         </FormControl>
       </div>
+
+      {/* Show loading spinner */}
+      {loading && <CircularProgress />}
+
+      {/* Show error message if API call fails */}
+      {error && <Typography color="error">{error}</Typography>}
+
+      {/* Display doctor cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px" }}>
-        {filteredDoctors.map((doctor, index) => (
+        {!loading && !error && filteredDoctors.map((doctor, index) => (
           <Card key={index} style={{ padding: "16px", boxShadow: "2px 2px 10px rgba(0,0,0,0.1)" }}>
             <CardContent>
               <img src={doctor.image} alt={doctor.name} style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px" }} />
@@ -91,7 +113,12 @@ export const Doctors = () => {
               <Typography color="textSecondary">{doctor.location}</Typography>
             </CardContent>
             <CardActions>
-              <Button variant="contained" color="primary" endIcon={<ArrowForwardIcon />}>
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: "#3cbece" }}
+                endIcon={<ArrowForwardIcon />}
+                onClick={() => window.location.href = `/consult/${doctor.name}`}
+              >
                 Consult
               </Button>
             </CardActions>

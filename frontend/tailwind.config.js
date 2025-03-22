@@ -5,6 +5,7 @@ export default {
     extend: {
       colors: {
         primary: "#50C878",
+        buttonPrimary: "#3cbece", // Custom button color
       },
       gridTemplateColumns: {
         auto: "repeat(auto-fill,minmax(200px,1fr))",

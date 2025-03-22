@@ -91,9 +91,15 @@ export const Pharmacy = () => {
                             <Typography color="textSecondary">{medicine.location}</Typography>
                         </CardContent>
                         <CardActions>
-                            <Button variant="contained" color="primary" endIcon={<ArrowForwardIcon />}>
+                            <Button
+                                variant="contained"
+                                sx={{ backgroundColor: "#3cbece" }}
+                                endIcon={<ArrowForwardIcon />}
+                                onClick={() => window.location.href = `/order/${medicine.name}`}
+                            >
                                 Order
                             </Button>
+
                         </CardActions>
                     </Card>
                 ))}
