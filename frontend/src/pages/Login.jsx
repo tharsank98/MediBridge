@@ -8,9 +8,12 @@ import PersonIcon from "@mui/icons-material/Person";
 import { motion } from "framer-motion";
 import * as yup from "yup";
 import { useFormik } from "formik";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import countryData from "dialcode-and-country-data/data/Country_Data.json";
-import countryDialCodes from "dialcode-and-country-data/data/Country_Dialcode.json";
 import { userLogin, registerUser } from "../api/axiosInstance";
+import { TextField } from "@mui/material";
 
 export function Login() {
   const navigate = useNavigate();
@@ -18,63 +21,59 @@ export function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
-  const [countries] = useState(Object.keys(countryData));
   const [cities, setCities] = useState([]);
-  const [countryCode, setCountryCode] = useState("");
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
 
+  // Fixed country and dial code for Sri Lanka
+  const country = "Sri Lanka";
+  const countryCode = "+94";
+
+  // Validation schema
   const validationSchema = yup.object({
-    name: yup.string().test({
-      name: "required-if-signup",
-      test: function (value) {
-        return isLogin || !!value || this.createError({ message: "Full Name is required" });
-      },
-    }),
-    username: yup.string().test({
-      name: "required-if-signup",
-      test: function (value) {
-        return isLogin || !!value || this.createError({ message: "Username is required" });
-      },
+    name: yup.string().when([], {
+      is: () => !isLogin,
+      then: yup.string().required("Full Name is required"),
     }),
     email: yup.string().email("Invalid email").required("Email is required"),
     password: yup.string().min(8, "Password must be at least 8 characters").required("Password is required"),
-    confirmPassword: yup.string().test({
-      name: "password-match",
-      test: function (value) {
-        return isLogin || (value === this.parent.password) || this.createError({ message: "Passwords must match" });
-      },
+    confirmPassword: yup.string().when([], {
+      is: () => !isLogin,
+      then: yup.string().oneOf([yup.ref("password")], "Passwords must match"),
     }),
-    country: yup.string().test({
-      name: "required-if-signup",
-      test: function (value) {
-        return isLogin || !!value || this.createError({ message: "Country is required" });
-      },
+    gender: yup.string().when([], {
+      is: () => !isLogin,
+      then: yup.string().required("Gender is required"),
     }),
-    city: yup.string().test({
-      name: "required-if-signup",
-      test: function (value) {
-        return isLogin || !!value || this.createError({ message: "City is required" });
-      },
+    dob: yup.date().when([], {
+      is: () => !isLogin,
+      then: yup.date().required("Date of Birth is required"),
     }),
-    phone: yup.string().test({
-      name: "required-if-signup",
-      test: function (value) {
-        return isLogin || !!value || this.createError({ message: "Phone number is required" });
-      },
+    city: yup.string().when([], {
+      is: () => !isLogin,
+      then: yup.string().required("City is required"),
+    }),
+    address: yup.string().when([], {
+      is: () => !isLogin,
+      then: yup.string().required("Address is required"),
+    }),
+    phone: yup.string().when([], {
+      is: () => !isLogin,
+      then: yup.string().required("Phone number is required"),
     }),
   });
 
   const formik = useFormik({
     initialValues: {
       name: "",
-      username: "",
       email: "",
       password: "",
       confirmPassword: "",
-      country: "",
+      gender: "",
+      dob: null,
       city: "",
+      address: "",
       phone: "",
     },
     validationSchema,
@@ -82,6 +81,7 @@ export function Login() {
       try {
         if (isForgotPassword) {
           if (otpSent) {
+            // Replace with backend OTP verification logic
             if (otp === "123456") {
               toast.success("OTP verified successfully!");
               setIsForgotPassword(false);
@@ -91,19 +91,20 @@ export function Login() {
               toast.error("Invalid OTP. Please try again.");
             }
           } else {
+            // Replace with backend OTP sending logic
             toast.success("OTP sent to your email!");
             setOtpSent(true);
           }
         } else {
           if (isLogin) {
-            const response = await userLogin({
+            await userLogin({
               email: values.email,
               password: values.password,
             });
             toast.success("Logged in successfully!");
-            navigate("/"); 
+            navigate("/");
           } else {
-            const response = await registerUser(values);
+            await registerUser(values);
             toast.success("Signed up successfully!");
             setIsLogin(true);
           }
@@ -115,21 +116,20 @@ export function Login() {
   });
 
   useEffect(() => {
-    if (formik.values.country) {
-      setCities(countryData[formik.values.country] || []);
-      setCountryCode(countryDialCodes[formik.values.country] || "");
-      formik.setFieldValue("phone", countryDialCodes[formik.values.country] || "");
-    }
-  }, [formik.values.country]);
+    // Fetch cities for Sri Lanka
+    setCities(countryData[country] || []);
+  }, []);
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
-    if (file) {
+    if (file && file.size < 2 * 1024 * 1024 && file.type.startsWith("image/")) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileImage(reader.result);
       };
       reader.readAsDataURL(file);
+    } else {
+      toast.error("Invalid file. Please upload an image less than 2MB.");
     }
   };
 
@@ -147,7 +147,7 @@ export function Login() {
                 ) : (
                   <PersonIcon fontSize="large" className="mb-2" />
                 )}
-                <label htmlFor="upload-photo" className="cursor-pointer">
+                <label htmlFor="upload-photo" className="cursor-pointer" aria-label="Upload Profile Photo">
                   <AddAPhotoIcon fontSize="large" />
                 </label>
                 <input
@@ -164,8 +164,18 @@ export function Login() {
             {isForgotPassword ? "Forgot Password" : isLogin ? "Login" : "Sign Up"}
           </h2>
           <form onSubmit={formik.handleSubmit} className="space-y-4">
-            {isForgotPassword ? (
-              <>
+            {!isLogin && (
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Full Name"
+                  {...formik.getFieldProps("name")}
+                  className="w-full p-2 border rounded-lg"
+                />
+                {formik.touched.name && formik.errors.name ? (
+                  <div className="text-red-500 text-sm">{formik.errors.name}</div>
+                ) : null}
                 <input
                   type="email"
                   name="email"
@@ -176,236 +186,125 @@ export function Login() {
                 {formik.touched.email && formik.errors.email ? (
                   <div className="text-red-500 text-sm">{formik.errors.email}</div>
                 ) : null}
-                {otpSent && (
+                <div className="relative">
                   <input
-                    type="text"
-                    name="otp"
-                    placeholder="Enter OTP"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    placeholder="Password"
+                    {...formik.getFieldProps("password")}
                     className="w-full p-2 border rounded-lg"
                   />
-                )}
-                <motion.button
-                  type="submit"
-                  className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {otpSent ? "Verify OTP" : "Send OTP"}
-                </motion.button>
-              </>
-            ) : (
-              <>
-                {!isLogin && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-4">
-                      <input
-                        type="text"
-                        name="name"
-                        placeholder="Full Name"
-                        {...formik.getFieldProps("name")}
-                        className="w-full p-2 border rounded-lg"
-                      />
-                      {formik.touched.name && formik.errors.name ? (
-                        <div className="text-red-500 text-sm">{formik.errors.name}</div>
-                      ) : null}
-                      <select
-                        name="country"
-                        {...formik.getFieldProps("country")}
-                        className="w-full p-2 border rounded-lg"
-                      >
-                        <option value="">Select Country</option>
-                        {countries.map((country) => (
-                          <option key={country} value={country}>
-                            {country}
-                          </option>
-                        ))}
-                      </select>
-                      {formik.touched.country && formik.errors.country ? (
-                        <div className="text-red-500 text-sm">{formik.errors.country}</div>
-                      ) : null}
-                      <input
-                        type="email"
-                        name="email"
-                        placeholder="Email"
-                        {...formik.getFieldProps("email")}
-                        className="w-full p-2 border rounded-lg"
-                      />
-                      {formik.touched.email && formik.errors.email ? (
-                        <div className="text-red-500 text-sm">{formik.errors.email}</div>
-                      ) : null}
-                      <div className="relative">
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          name="password"
-                          placeholder="Password"
-                          {...formik.getFieldProps("password")}
-                          className="w-full p-2 border rounded-lg"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-2 top-2"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </button>
-                        {formik.touched.password && formik.errors.password ? (
-                          <div className="text-red-500 text-sm">{formik.errors.password}</div>
-                        ) : null}
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <input
-                        type="text"
-                        name="username"
-                        placeholder="Username"
-                        {...formik.getFieldProps("username")}
-                        className="w-full p-2 border rounded-lg"
-                      />
-                      {formik.touched.username && formik.errors.username ? (
-                        <div className="text-red-500 text-sm">{formik.errors.username}</div>
-                      ) : null}
-                      <select
-                        name="city"
-                        {...formik.getFieldProps("city")}
-                        className="w-full p-2 border rounded-lg"
-                      >
-                        <option value="">Select City</option>
-                        {cities.map((city) => (
-                          <option key={city} value={city}>
-                            {city}
-                          </option>
-                        ))}
-                      </select>
-                      {formik.touched.city && formik.errors.city ? (
-                        <div className="text-red-500 text-sm">{formik.errors.city}</div>
-                      ) : null}
-                      <input
-                        type="text"
-                        name="phone"
-                        placeholder="Phone Number"
-                        {...formik.getFieldProps("phone")}
-                        className="w-full p-2 border rounded-lg"
-                        value={formik.values.phone}
-                        onChange={(e) =>
-                          formik.setFieldValue(
-                            "phone",
-                            `${countryCode}${e.target.value.replace(countryCode, "").trim()}`
-                          )
-                        }
-                      />
-                      {formik.touched.phone && formik.errors.phone ? (
-                        <div className="text-red-500 text-sm">{formik.errors.phone}</div>
-                      ) : null}
-                      <div className="relative">
-                        <input
-                          type={showConfirmPassword ? "text" : "password"}
-                          name="confirmPassword"
-                          placeholder="Confirm Password"
-                          {...formik.getFieldProps("confirmPassword")}
-                          className="w-full p-2 border rounded-lg"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-2 top-2"
-                        >
-                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                        </button>
-                        {formik.touched.confirmPassword && formik.errors.confirmPassword ? (
-                          <div className="text-red-500 text-sm">{formik.errors.confirmPassword}</div>
-                        ) : null}
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {isLogin && (
-                  <div className="space-y-4">
-                    <div className="flex justify-center w-full">
-                      <input
-                        type="email"
-                        name="email"
-                        placeholder="Email"
-                        {...formik.getFieldProps("email")}
-                        className="w-full p-2 border rounded-lg"
-                      />
-                    </div>
-                    {formik.touched.email && formik.errors.email ? (
-                      <div className="text-red-500 text-sm text-center">{formik.errors.email}</div>
-                    ) : null}
-                    <div className="flex justify-center w-full relative">
-                      <div className="relative w-full">
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          name="password"
-                          placeholder="Password"
-                          {...formik.getFieldProps("password")}
-                          className="w-full p-2 border rounded-lg"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-2 top-2"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </button>
-                      </div>
-                    </div>
-                    {formik.touched.password && formik.errors.password ? (
-                      <div className="text-red-500 text-sm text-center">{formik.errors.password}</div>
-                    ) : null}
-                  </div>
-                )}
-
-                <div className="flex justify-center">
-                  <motion.button
-                    type="submit"
-                    className="w-1/4 bg-[#3cbece] text-white py-2 rounded-lg hover:bg-blue-600 transition"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2 top-2"
+                    aria-label="Toggle Password Visibility"
                   >
-                    {isLogin ? "Login" : "Sign Up"}
-                  </motion.button>
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </button>
+                  {formik.touched.password && formik.errors.password ? (
+                    <div className="text-red-500 text-sm">{formik.errors.password}</div>
+                  ) : null}
                 </div>
-                <p className="text-center text-sm mt-4">
-                  {isLogin ? (
-                    <>
-                      Don&apos;t have an account?{" "}
-                      <span className="text-blue-500 cursor-pointer" onClick={() => setIsLogin(false)}>
-                        Sign up
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      Already have an account?{" "}
-                      <span className="text-blue-500 cursor-pointer" onClick={() => setIsLogin(true)}>
-                        Login
-                      </span>
-                    </>
-                  )}
-                </p>
-                {isLogin && (
-                  <p className="text-center text-sm mt-4">
-                    <span
-                      className="text-blue-500 cursor-pointer"
-                      onClick={() => setIsForgotPassword(true)}
-                    >
-                      Forgot Password?
-                    </span>
-                  </p>
-                )}
-              </>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    placeholder="Confirm Password"
+                    {...formik.getFieldProps("confirmPassword")}
+                    className="w-full p-2 border rounded-lg"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-2 top-2"
+                    aria-label="Toggle Confirm Password Visibility"
+                  >
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </button>
+                  {formik.touched.confirmPassword && formik.errors.confirmPassword ? (
+                    <div className="text-red-500 text-sm">{formik.errors.confirmPassword}</div>
+                  ) : null}
+                </div>
+                <select
+                  name="gender"
+                  {...formik.getFieldProps("gender")}
+                  className="w-full p-2 border rounded-lg"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+                {formik.touched.gender && formik.errors.gender ? (
+                  <div className="text-red-500 text-sm">{formik.errors.gender}</div>
+                ) : null}
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DatePicker
+                    label="Date of Birth"
+                    value={formik.values.dob}
+                    onChange={(value) => formik.setFieldValue("dob", value)}
+                    renderInput={(params) => <TextField {...params} />}
+                  />
+                </LocalizationProvider>
+                {formik.touched.dob && formik.errors.dob ? (
+                  <div className="text-red-500 text-sm">{formik.errors.dob}</div>
+                ) : null}
+                <select
+                  name="city"
+                  {...formik.getFieldProps("city")}
+                  className="w-full p-2 border rounded-lg"
+                >
+                  <option value="">Select City</option>
+                  {cities.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+                {formik.touched.city && formik.errors.city ? (
+                  <div className="text-red-500 text-sm">{formik.errors.city}</div>
+                ) : null}
+                <input
+                  type="text"
+                  name="address"
+                  placeholder="Address"
+                  {...formik.getFieldProps("address")}
+                  className="w-full p-2 border rounded-lg"
+                />
+                {formik.touched.address && formik.errors.address ? (
+                  <div className="text-red-500 text-sm">{formik.errors.address}</div>
+                ) : null}
+                <input
+                  type="text"
+                  name="phone"
+                  placeholder="Phone Number"
+                  {...formik.getFieldProps("phone")}
+                  className="w-full p-2 border rounded-lg"
+                  value={formik.values.phone}
+                  onChange={(e) =>
+                    formik.setFieldValue(
+                      "phone",
+                      `${countryCode}${e.target.value.replace(countryCode, "").trim()}`
+                    )
+                  }
+                />
+                {formik.touched.phone && formik.errors.phone ? (
+                  <div className="text-red-500 text-sm">{formik.errors.phone}</div>
+                ) : null}
+              </div>
             )}
+            <div className="flex justify-center">
+              <motion.button
+                type="submit"
+                className="w-1/4 bg-[#3cbece] text-white py-2 rounded-lg hover:bg-blue-600 transition"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {isLogin ? "Login" : "Sign Up"}
+              </motion.button>
+            </div>
           </form>
-        </div>
-        <div className={`hidden md:flex w-1/2 ${isLogin ? "order-1" : "order-2"} justify-center items-center ml-3 mr-3`}>
-          <img
-            src="/assets/doctor.jpg"
-            alt="Side"
-            className={`w-full h-full object-cover border-2 border-black rounded-xl m-[5px] ${isLogin ? "transform scale-x-[-1]" : ""
-              }`}
-          />
         </div>
       </div>
     </div>

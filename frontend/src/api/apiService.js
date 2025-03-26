@@ -3,7 +3,7 @@ import API from "./axiosInstance";
 // 1. Get doctor lists
 export const getDoctors = async () => {
   try {
-    const response = await API.get("/api/doctor/list");
+    const response = await API.get("/doctor/list"); // ✅ Fixed extra `/api`
     return response.data;
   } catch (error) {
     console.error("Error fetching doctors:", error);
@@ -14,7 +14,7 @@ export const getDoctors = async () => {
 // 2. Add doctor (Admin Only)
 export const addDoctor = async (doctorData) => {
   try {
-    const response = await API.post("/api/admin/add-doctor", doctorData);
+    const response = await API.post("/admin/add-doctor", doctorData);
     return response.data;
   } catch (error) {
     console.error("Error adding doctor:", error);
@@ -25,7 +25,7 @@ export const addDoctor = async (doctorData) => {
 // 3. Admin login
 export const adminLogin = async (credentials) => {
   try {
-    const response = await API.post("/api/admin/login", credentials);
+    const response = await API.post("/admin/login", credentials);
     return response.data;
   } catch (error) {
     console.error("Error logging in admin:", error);
@@ -36,7 +36,7 @@ export const adminLogin = async (credentials) => {
 // 4. User registration
 export const registerUser = async (userData) => {
   try {
-    const response = await API.post("/api/user/register", userData);
+    const response = await API.post("/user/register", userData);
     return response.data;
   } catch (error) {
     console.error("Error registering user:", error);
@@ -44,10 +44,16 @@ export const registerUser = async (userData) => {
   }
 };
 
-// 5. User login
+// 5. User login (Fixed to store token)
 export const userLogin = async (credentials) => {
   try {
-    const response = await API.post("/api/user/login", credentials);
+    const response = await API.post("/user/login", credentials);
+
+    // ✅ Store token in localStorage
+    if (response.data.token) {
+      localStorage.setItem("token", response.data.token);
+    }
+
     return response.data;
   } catch (error) {
     console.error("Error logging in user:", error);
@@ -55,10 +61,10 @@ export const userLogin = async (credentials) => {
   }
 };
 
-// 6. Get user details
+// 6. Get user details (Fixed RESTful API path)
 export const getUserDetails = async (userId) => {
   try {
-    const response = await API.get(`/api/user/get-profile?userId=${userId}`);
+    const response = await API.get(`/user/get-profile/${userId}`); // ✅ Fixed to use path parameter
     return response.data;
   } catch (error) {
     console.error("Error fetching user details:", error);
@@ -66,10 +72,13 @@ export const getUserDetails = async (userId) => {
   }
 };
 
-// 7. Edit user profile
+// 7. Edit user profile (Fixed RESTful API path)
 export const updateUserProfile = async (userId, updatedData) => {
   try {
-    const response = await API.put(`/api/user/update-profile?userId=${userId}`, updatedData);
+    const response = await API.put(
+      `/user/update-profile/${userId}`,
+      updatedData
+    ); // ✅ Fixed to use path parameter
     return response.data;
   } catch (error) {
     console.error("Error updating user profile:", error);

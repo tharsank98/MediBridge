@@ -9,7 +9,7 @@ import { MyProfile } from "./pages/MyProfile";
 import { ToastContainer } from "react-toastify";
 import { UserProvider, useUser } from "./context/UserContext";
 import ForgotPassword from "./pages/ForgotPassword";
-import { Login } from "./pages/Login";
+// import { Login } from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { DoctorConsult } from "./pages/Doctor_Consult";
 import { MedicineOrder } from "./pages/Medicine_Order";
@@ -40,7 +40,7 @@ const AppContent = () => {
         <Route path="/contact" element={<ProtectedRoute element={<Contact />} />} />
         <Route path="/myprofile" element={<ProtectedRoute element={<MyProfile />} />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/login" element={<Login />} />
+        {/* <Route path="/login" element={<Login />} /> */}
       </Routes>
       {user && <Footer />}
     </>

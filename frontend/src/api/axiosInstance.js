@@ -1,19 +1,43 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000",
+  baseURL: "http://localhost:4001", // Remove extra `/api`
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // Enable cookies (if needed)
 });
 
-// Add token to requests
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token"); // Get token from localStorage
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// 🔹 Request Interceptor: Attach Token
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token"); // Retrieve token
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// 🔹 Response Interceptor: Handle Errors Globally
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      if (error.response.status === 401) {
+        // Unauthorized: Clear token & redirect
+        localStorage.removeItem("token");
+        window.location.href = "/login"; // Redirect to login page
+      }
+      return Promise.reject(error.response.data);
+    }
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
-export default API;
+const AxiosProvider = () => {
+  return null; // Empty component
+};
+
+export default AxiosProvider;

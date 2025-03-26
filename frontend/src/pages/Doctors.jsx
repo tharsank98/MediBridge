@@ -7,13 +7,16 @@ import countryData from "dialcode-and-country-data/data/Country_Data.json";
 
 export const Doctors = () => {
   const [search, setSearch] = useState("");
-  const [country, setCountry] = useState("");
   const [location, setLocation] = useState("");
   const [specialization, setSpecialization] = useState("");
   const [locations, setLocations] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Fixed country and dial code for Sri Lanka
+  const country = "Sri Lanka";
+  const countryCode = "+94";
 
   // Fetch doctors from backend API
   useEffect(() => {
@@ -31,14 +34,10 @@ export const Doctors = () => {
     fetchDoctors();
   }, []);
 
-  // Update locations when country changes
+  // Update locations for Sri Lanka
   useEffect(() => {
-    if (country) {
-      setLocations(countryData[country] || []);
-    } else {
-      setLocations([]);
-    }
-  }, [country]);
+    setLocations(countryData[country] || []);
+  }, []);
 
   // Filter doctors based on search and filters
   const filteredDoctors = doctors.filter(
@@ -46,7 +45,6 @@ export const Doctors = () => {
       (doctor.name.toLowerCase().includes(search.toLowerCase()) ||
         doctor.specialization.toLowerCase().includes(search.toLowerCase()) ||
         doctor.hospital.toLowerCase().includes(search.toLowerCase())) &&
-      (country === "" || doctor.country === country) &&
       (location === "" || doctor.location === location) &&
       (specialization === "" || doctor.specialization === specialization)
   );
@@ -54,20 +52,11 @@ export const Doctors = () => {
   return (
     <div style={{ padding: "24px" }}>
       <Typography variant="h5" gutterBottom>
-        Find Doctors
+        Find Doctors in Sri Lanka
       </Typography>
 
       {/* Filters */}
       <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "16px" }}>
-        <FormControl style={{ flex: 1, minWidth: "200px" }}>
-          <InputLabel>Country</InputLabel>
-          <Select value={country} onChange={(e) => setCountry(e.target.value)}>
-            <MenuItem value="">All Countries</MenuItem>
-            {Object.keys(countryData).map((country) => (
-              <MenuItem key={country} value={country}>{country}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
         <TextField
           variant="outlined"
           placeholder="Search by name, specialization, or hospital"
