@@ -1,22 +1,14 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardActions, Typography, Button, MenuItem, Select, InputLabel, FormControl, CircularProgress } from "@mui/material";
-import { TextField } from "@mui/material";
+import { Card, CardContent, CardActions, Typography, Button, CircularProgress } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import axios from "../api/axiosInstance";
-import countryData from "dialcode-and-country-data/data/Country_Data.json";
+import Searchbar from "../components/Searchbar";
 
 export const Doctors = () => {
-  const [search, setSearch] = useState("");
-  const [location, setLocation] = useState("");
-  const [specialization, setSpecialization] = useState("");
-  const [locations, setLocations] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Fixed country and dial code for Sri Lanka
-  const country = "Sri Lanka";
-  const countryCode = "+94";
 
   // Fetch doctors from backend API
   useEffect(() => {
@@ -34,85 +26,65 @@ export const Doctors = () => {
     fetchDoctors();
   }, []);
 
-  // Update locations for Sri Lanka
-  useEffect(() => {
-    setLocations(countryData[country] || []);
-  }, []);
-
-  // Filter doctors based on search and filters
+  // Filter doctors based on search query (name or location)
   const filteredDoctors = doctors.filter(
     (doctor) =>
-      (doctor.name.toLowerCase().includes(search.toLowerCase()) ||
-        doctor.specialization.toLowerCase().includes(search.toLowerCase()) ||
-        doctor.hospital.toLowerCase().includes(search.toLowerCase())) &&
-      (location === "" || doctor.location === location) &&
-      (specialization === "" || doctor.specialization === specialization)
+      doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      doctor.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div className="p-6">
       <Typography variant="h5" gutterBottom>
-        Find Doctors in Sri Lanka
+        Find Doctors
       </Typography>
 
-      {/* Filters */}
-      <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "16px" }}>
-        <TextField
-          variant="outlined"
-          placeholder="Search by name, specialization, or hospital"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ flex: 1, minWidth: "200px" }}
-        />
-        <FormControl style={{ flex: 1, minWidth: "200px" }}>
-          <InputLabel>Location</InputLabel>
-          <Select value={location} onChange={(e) => setLocation(e.target.value)}>
-            <MenuItem value="">All Locations</MenuItem>
-            {locations.map((loc) => (
-              <MenuItem key={loc} value={loc}>{loc}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl style={{ flex: 1, minWidth: "200px" }}>
-          <InputLabel>Specialization</InputLabel>
-          <Select value={specialization} onChange={(e) => setSpecialization(e.target.value)}>
-            <MenuItem value="">All Specializations</MenuItem>
-            {["Cardiologist", "Dentist", "Diabetics", "Neurologist", "Pediatrician"].map((spec) => (
-              <MenuItem key={spec} value={spec}>{spec}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+      {/* Single Searchbar */}
+      <div className="flex gap-4 mb-6">
+        <Searchbar onSearch={(query) => setSearchQuery(query)} />
       </div>
 
       {/* Show loading spinner */}
       {loading && <CircularProgress />}
 
       {/* Show error message if API call fails */}
-      {error && <Typography color="error">{error}</Typography>}
+      {error && (
+        <Typography color="error" className="mb-4">
+          {error}
+        </Typography>
+      )}
 
       {/* Display doctor cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "16px" }}>
-        {!loading && !error && filteredDoctors.map((doctor, index) => (
-          <Card key={index} style={{ padding: "16px", boxShadow: "2px 2px 10px rgba(0,0,0,0.1)" }}>
-            <CardContent>
-              <img src={doctor.image} alt={doctor.name} style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px" }} />
-              <Typography variant="h6" style={{ marginTop: "8px" }}>{doctor.name}</Typography>
-              <Typography color="textSecondary">{doctor.specialization}</Typography>
-              <Typography color="textSecondary">{doctor.hospital}</Typography>
-              <Typography color="textSecondary">{doctor.location}</Typography>
-            </CardContent>
-            <CardActions>
-              <Button
-                variant="contained"
-                sx={{ backgroundColor: "#3cbece" }}
-                endIcon={<ArrowForwardIcon />}
-                onClick={() => window.location.href = `/consult/${doctor.name}`}
-              >
-                Consult
-              </Button>
-            </CardActions>
-          </Card>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {!loading &&
+          !error &&
+          filteredDoctors.map((doctor, index) => (
+            <Card key={index} className="p-4 shadow-md">
+              <CardContent>
+                <img
+                  src={doctor.image}
+                  alt={doctor.name}
+                  className="w-full h-40 object-cover rounded-md"
+                />
+                <Typography variant="h6" className="mt-4">
+                  {doctor.name}
+                </Typography>
+                <Typography color="textSecondary">{doctor.specialization}</Typography>
+                <Typography color="textSecondary">{doctor.hospital}</Typography>
+                <Typography color="textSecondary">{doctor.location}</Typography>
+              </CardContent>
+              <CardActions>
+                <Button
+                  variant="contained"
+                  sx={{ backgroundColor: "#3cbece" }}
+                  endIcon={<ArrowForwardIcon />}
+                  onClick={() => (window.location.href = `/consult/${doctor.name}`)}
+                >
+                  Consult
+                </Button>
+              </CardActions>
+            </Card>
+          ))}
       </div>
     </div>
   );
