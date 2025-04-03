@@ -1,35 +1,61 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Container, TextField, Button, Typography, Paper } from "@mui/material";
+import { ArrowBack } from "@mui/icons-material";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 export const DoctorConsult = () => {
-    const { doctorName } = useParams(); 
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { date, time, doctorName } = location.state || {};
     const [patientName, setPatientName] = useState("");
     const [phone, setPhone] = useState("");
-    const [email, setEmail] = useState("");
+    const [age, setAge] = useState("");
     const [message, setMessage] = useState("");
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        console.log({ patientName, phone, email, message, doctorName });
+        console.log({
+            patientName,
+            phone,
+            age,
+            message,
+            date,
+            time,
+            doctorName,
+        });
 
         toast.success("Your consultation request has been submitted.");
 
         setPatientName("");
         setPhone("");
-        setEmail("");
+        setAge("");
         setMessage("");
+    };
+
+    const handleGoBack = () => {
+        navigate(-1);
     };
 
     return (
         <Container maxWidth="sm" style={{ marginTop: "20px", marginBottom: "10px" }}>
             <Paper elevation={3} style={{ padding: "20px", textAlign: "center" }}>
+                {/* Back Button */}
+                <Button
+                    variant="outlined"
+                    startIcon={<ArrowBack />}
+                    onClick={handleGoBack}
+                    style={{ marginBottom: "20px" }}
+                />
+
                 <Typography variant="h5" gutterBottom>
-                    Consult with {doctorName}
+                    Consult with Dr. {doctorName}
                 </Typography>
+                <Typography variant="h6" color="textSecondary" gutterBottom>
+                    Appointment: {date} at {time}
+                </Typography>
+
                 <form onSubmit={handleSubmit}>
                     <TextField
                         fullWidth
@@ -51,11 +77,13 @@ export const DoctorConsult = () => {
                     />
                     <TextField
                         fullWidth
-                        label="Email (Optional)"
+                        label="Patient Age"
                         variant="outlined"
                         margin="normal"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        type="number"
+                        value={age}
+                        onChange={(e) => setAge(e.target.value)}
+                        required
                     />
                     <TextField
                         fullWidth
@@ -68,7 +96,13 @@ export const DoctorConsult = () => {
                         onChange={(e) => setMessage(e.target.value)}
                         required
                     />
-                    <Button variant="contained" sx={{ backgroundColor: "#3cbece" }} type="submit" fullWidth style={{ marginTop: "10px" }}>
+                    <Button
+                        variant="contained"
+                        sx={{ backgroundColor: "#3cbece" }}
+                        type="submit"
+                        fullWidth
+                        style={{ marginTop: "10px" }}
+                    >
                         Submit Consultation Request
                     </Button>
                 </form>
