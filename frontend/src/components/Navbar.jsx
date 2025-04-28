@@ -5,7 +5,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
 
-const Logo = "/assets/MediBridge_logo.png"; 
+const Logo = "/assets/MediBridge_logo.png";
 
 export const Navbar = () => {
   const [click, setClick] = useState(false);
@@ -61,9 +61,9 @@ export const Navbar = () => {
               <ul className="flex gap-8 text-lg">
                 {[
                   { name: "Home", path: "/" },
-                  { name: "Doctors", path: "/Doctors" },
-                  { name: "Pharmacy", path: "/Pharmacy" },
-                  { name: "Contact", path: "/Contact" },
+                  { name: "Doctors", path: "/doctor" },
+                  { name: "Pharmacy", path: "/pharmacy" },
+                  { name: "Contact", path: "/contact" },
                 ].map((item) => (
                   <li key={item.path}>
                     <Link
@@ -127,10 +127,10 @@ export const Navbar = () => {
             <ul className="text-center text-xl p-10">
               {[
                 { name: "Home", path: "/" },
-                { name: "Doctors", path: "/Doctors" },
-                { name: "Pharmacy", path: "/Pharmacy" },
-                { name: "Contact", path: "/Contact" },
-                { name: "My Profile", path: "/MyProfile", icon: <PersonIcon className="text-white mr-2" /> },
+                { name: "Doctors", path: "/doctor" },
+                { name: "Pharmacy", path: "/pharmacy" },
+                { name: "Contact", path: "/contact" },
+                { name: "My Profile", path: "/myprofile", icon: <PersonIcon className="text-white mr-2" /> },
               ].map((item) => (
                 <li key={item.path} className="my-4 py-4 border-b border-slate-800 hover:bg-blue-700 hover:rounded cursor-pointer">
                   <Link to={item.path} onClick={() => setClick(false)}>

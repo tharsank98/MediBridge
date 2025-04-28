@@ -5,10 +5,11 @@ import { CircularProgress } from "@mui/material";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { ArrowBack } from "@mui/icons-material"; // Importing back arrow icon
+import { ArrowBack } from "@mui/icons-material";
+import axiosInstance from '../api/axiosInstance'; 
 
 export const ViewDoctor = () => {
-    const { doctorName } = useParams();
+    const { doctorName } = useParams();  
     const navigate = useNavigate();
     const [doctor, setDoctor] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -20,21 +21,11 @@ export const ViewDoctor = () => {
     useEffect(() => {
         const fetchDoctorDetails = async () => {
             try {
-                const response = {
-                    data: {
-                        name: "Dr. John Doe",
-                        image: "/assets/doctor1.jpg",
-                        degree: "MBBS, MD",
-                        experience: 10,
-                        specialization: "Cardiology",
-                        bio: "Dr. John Doe has been practicing cardiology for over 10 years, specializing in heart disease prevention and treatment.",
-                        location: "New York, USA",
-                        schedule: ["16:00", "16:30", "17:00", "17:30", "18:00"],
-                    },
-                };
-                setDoctor(response.data);
-                generateAvailableTimes(response.data.schedule);
+                const response = await axiosInstance.get(`/doctor/${doctorName}`);
+                setDoctor(response.data);  
+                generateAvailableTimes(response.data.schedule); 
             } catch (error) {
+                console.log(error);
                 setError("Failed to fetch doctor details. Please try again later.");
             } finally {
                 setLoading(false);
@@ -44,22 +35,22 @@ export const ViewDoctor = () => {
         const generateAvailableTimes = (schedule) => {
             const availableSlots = [];
             let currentTime = new Date();
-            currentTime.setHours(16, 0, 0, 0);
+            currentTime.setHours(16, 0, 0, 0); 
 
             for (let i = 0; i < 8; i++) {
                 const slotTime = new Date(currentTime);
                 const slotTimeString = slotTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
                 availableSlots.push({
                     time: slotTimeString,
-                    available: !schedule.includes(slotTimeString),
+                    available: !schedule.includes(slotTimeString), 
                 });
 
-                currentTime.setMinutes(currentTime.getMinutes() + 30);
+                currentTime.setMinutes(currentTime.getMinutes() + 30);  
             }
             setAvailableTimes(availableSlots);
         };
 
-        fetchDoctorDetails();
+        fetchDoctorDetails(); 
     }, [doctorName]);
 
     const handleBooking = (time) => {
@@ -75,11 +66,11 @@ export const ViewDoctor = () => {
         }
     };
 
-    if (loading) return <CircularProgress />;
-    if (error) return <div>{error}</div>;
+    if (loading) return <CircularProgress />;  
+    if (error) return <div>{error}</div>;  
 
     const handleGoBack = () => {
-        navigate(-1);
+        navigate(-1);  
     };
 
     return (

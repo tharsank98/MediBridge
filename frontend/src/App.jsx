@@ -12,7 +12,10 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { DoctorConsult } from "./pages/Doctor_Consult";
 import { MedicineOrder } from "./pages/Medicine_Order";
-import { ViewDoctor } from "./pages/View_Doctor"; // Import the ViewDoctor component
+import { ViewDoctor } from "./pages/View_Doctor";
+// import { View_Pharmacy } from "./pages/View_Pharmacy";
+// import { Registration } from "./pages/Registration";
+// import { Login } from "./pages/Login";
 
 function App() {
   return (
@@ -33,17 +36,17 @@ const AppContent = () => {
       {user && <Navbar />}
       <Routes>
         <Route path="/" element={<ProtectedRoute element={<Home />} />} />
-        <Route path="/doctors" element={<ProtectedRoute element={<Doctors />} />} />
-        {/* Add route for DoctorConsult here */}
+        <Route path="/doctor" element={<ProtectedRoute element={<Doctors />} />} />
         <Route path="/doctor_consult" element={<ProtectedRoute element={<DoctorConsult />} />} />
         <Route path="/doctor/:doctorName" element={<ViewDoctor />} />
         <Route path="/pharmacy" element={<ProtectedRoute element={<Pharmacy />} />} />
+        {/* <Route path="/view_pharmacy/:pharmacyName" component={View_Pharmacy} /> */}
         <Route path="/order/:medicineName" element={<MedicineOrder />} />
         <Route path="/contact" element={<ProtectedRoute element={<Contact />} />} />
         <Route path="/myprofile" element={<ProtectedRoute element={<MyProfile />} />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        {/* <Route path="/login" element={<Login />} /> */}
-        {/* <Route path="/register" element={<Registration />} /> */}
+        {/* <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Registration />} /> */}
       </Routes>
       {user && <Footer />}
     </>

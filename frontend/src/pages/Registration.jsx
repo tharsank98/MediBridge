@@ -20,7 +20,7 @@ export function Registration() {
   const [profileImage, setProfileImage] = useState(null);
   const [cities, setCities] = useState([]);
   const country = "Sri Lanka";
-  const countryCode = "+94"; // Fixed Country Code for Sri Lanka
+  const countryCode = "+94";
 
   useEffect(() => {
     setCities(countryData[country] || []);

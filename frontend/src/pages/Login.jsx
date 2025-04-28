@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom"; 
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { motion } from "framer-motion";
@@ -24,7 +24,7 @@ export function Login() {
     validationSchema,
     onSubmit: async (values) => {
       try {
-        const response = await axios.post("/api/user/login", {
+        const response = await axios.post("/user/login", {
           email: values.email,
           password: values.password,
         });
