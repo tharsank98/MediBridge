@@ -22,7 +22,6 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
-// Importing the data from the npm package
 import countryData from "dialcode-and-country-data/data/Country_Data.json";
 import countryDialCodes from "dialcode-and-country-data/data/Country_Dialcode.json";
 

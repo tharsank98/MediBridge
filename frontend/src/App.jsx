@@ -13,7 +13,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { DoctorConsult } from "./pages/Doctor_Consult";
 import { MedicineOrder } from "./pages/Medicine_Order";
 import { ViewDoctor } from "./pages/View_Doctor";
-// import { View_Pharmacy } from "./pages/View_Pharmacy";
+import { View_Pharmacy } from "./pages/View_Pharmacy";
+// import { CartPage } from "./pages/CartPage";
 // import { Registration } from "./pages/Registration";
 // import { Login } from "./pages/Login";
 
@@ -40,7 +41,8 @@ const AppContent = () => {
         <Route path="/doctor_consult" element={<ProtectedRoute element={<DoctorConsult />} />} />
         <Route path="/doctor/:doctorName" element={<ViewDoctor />} />
         <Route path="/pharmacy" element={<ProtectedRoute element={<Pharmacy />} />} />
-        {/* <Route path="/view_pharmacy/:pharmacyName" component={View_Pharmacy} /> */}
+        {/* <Route path="/cart" element={<ProtectedRoute element={<CartPage />} />} /> */}
+        <Route path="/pharmacy/:pharmacyName" element={<View_Pharmacy />} />
         <Route path="/order/:medicineName" element={<MedicineOrder />} />
         <Route path="/contact" element={<ProtectedRoute element={<Contact />} />} />
         <Route path="/myprofile" element={<ProtectedRoute element={<MyProfile />} />} />

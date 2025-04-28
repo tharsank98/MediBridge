@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Card, CardContent, CardActions, Typography, Button, Snackbar, Badge } from "@mui/material";
+import { Card, CardContent, CardActions, Typography, Button, Badge, IconButton } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import Searchbar from "../components/Searchbar";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const pharmacies = [
     { name: "City Pharmacy", location: "Downtown", image: "https://via.placeholder.com/150" },
@@ -13,14 +13,22 @@ const pharmacies = [
 
 export const Pharmacy = () => {
     const [searchQuery, setSearchQuery] = useState("");
-    const [openSnackbar, setOpenSnackbar] = useState(false);
+    const navigate = useNavigate(); // for navigation
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
     const filteredPharmacies = pharmacies.filter(
         (pharmacy) =>
             pharmacy.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             pharmacy.location.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    const handleOrderClick = (pharmacyName) => {
+        navigate(`/pharmacy/${pharmacyName}`);
+    };
 
+    const handleCartClick = () => {
+        navigate("/cart");
+    };
 
     return (
         <div style={{ padding: "24px", position: "relative" }}>
@@ -51,7 +59,7 @@ export const Pharmacy = () => {
                                 variant="contained"
                                 sx={{ backgroundColor: "#3cbece" }}
                                 endIcon={<ArrowForwardIcon />}
-                                onClick={() => window.location.href = `/pharmacy/${pharmacy.name}`}
+                                onClick={() => handleOrderClick(pharmacy.name)}
                             >
                                 Order Here
                             </Button>
@@ -60,18 +68,21 @@ export const Pharmacy = () => {
                 ))}
             </div>
 
-            <Snackbar
-                open={openSnackbar}
-                autoHideDuration={3000}
-                onClose={() => setOpenSnackbar(false)}
-                message="Pharmacy added to cart!"
-            />
-
-            <Link to="/cart" style={{ position: "absolute", top: 16, right: 16 }}>
-                <Badge badgeContent={cart.length} color="primary">
-                    <AddShoppingCartIcon sx={{ fontSize: 40, color: "#3cbece" }} />
+            <IconButton
+                style={{
+                    position: "fixed",
+                    top: "90px",
+                    right: "30px",
+                    backgroundColor: "#3cbece",
+                    color: "white",
+                    zIndex: 1000,
+                }}
+                onClick={handleCartClick}
+            >
+                <Badge badgeContent={cart.length} color="error">
+                    <AddShoppingCartIcon sx={{ fontSize: 40, color: "white" }} />
                 </Badge>
-            </Link>
+            </IconButton>
         </div>
     );
 };
