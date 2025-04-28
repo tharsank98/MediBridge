@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Card, CardContent, CardActions, Typography, Button, Snackbar, Badge } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart"; 
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import Searchbar from "../components/Searchbar";
-import { Link } from "react-router-dom"; 
+import { Link } from "react-router-dom";
 
 const pharmacies = [
     { name: "City Pharmacy", location: "Downtown", image: "https://via.placeholder.com/150" },
@@ -13,7 +13,7 @@ const pharmacies = [
 
 export const Pharmacy = () => {
     const [searchQuery, setSearchQuery] = useState("");
-    const [openSnackbar, setOpenSnackbar] = useState(false); 
+    const [openSnackbar, setOpenSnackbar] = useState(false);
     const filteredPharmacies = pharmacies.filter(
         (pharmacy) =>
             pharmacy.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
