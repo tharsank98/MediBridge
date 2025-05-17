@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   TextField,
   Button,
@@ -43,8 +42,7 @@ export const MyProfile = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [cityOptions, setCityOptions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [imagePopupOpen, setImagePopupOpen] = useState(false); // State for image popup
-  // const navigate = useNavigate();
+  const [imagePopupOpen, setImagePopupOpen] = useState(false); 
 
   const [countryDataState, setCountryData] = useState({});
   const [countryDialCodeState, setCountryDialCodes] = useState({});
@@ -57,7 +55,6 @@ export const MyProfile = () => {
   useEffect(() => {
     setLoading(true);
 
-    // Simulating data fetching from the npm package (already imported above)
     setCountryData(countryData);
     setCountryDialCodes(countryDialCodes);
     setLoading(false);
@@ -180,7 +177,7 @@ export const MyProfile = () => {
     validationSchema: passwordValidationSchema,
     onSubmit: (values) => {
       // Simulate password change
-      if (values.currentPassword === "correctPassword") { // Example check
+      if (values.currentPassword === "correctPassword") { 
         toast.success("Password updated successfully!");
         setShowPasswordChange(false);
       } else {
@@ -191,7 +188,7 @@ export const MyProfile = () => {
 
   const handleForgotPasswordSubmit = (values) => {
     if (otpSent) {
-      if (otp === "123456") { // Example OTP check
+      if (otp === "123456") { 
         toast.success("OTP verified successfully!");
         setForgotPassword(false);
         setOtpSent(false);
@@ -200,25 +197,23 @@ export const MyProfile = () => {
         toast.error("Invalid OTP. Please try again.");
       }
     } else {
-      // Simulate sending OTP
       toast.success("OTP sent to your email!");
       setOtpSent(true);
     }
   };
 
   if (loading) {
-    return <div>Loading...</div>; // A simple loader or a spinner.
+    return <div>Loading...</div>; 
   }
 
   return (
     <div className="max-w-lg mx-auto p-6 bg-gray-100 rounded-lg shadow-2xl">
-      {/* Profile Photo */}
       <div className="flex justify-center mb-6 relative">
         <Avatar
           alt={user.username}
           src={user.photo}
           sx={{ width: 120, height: 120 }}
-          onClick={() => setImagePopupOpen(true)} // Open image popup on click
+          onClick={() => setImagePopupOpen(true)} 
         >
           {!user.photo && <PersonIcon />}
         </Avatar>

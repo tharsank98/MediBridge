@@ -7,7 +7,7 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 export const MedicineOrder = () => {
-    const { medicineName } = useParams(); // Get medicine name from route params
+    const { medicineName } = useParams(); 
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
     const [address, setAddress] = useState("");
@@ -36,7 +36,6 @@ export const MedicineOrder = () => {
 
         toast.success(`Your order has been placed. ${delivery ? "Delivery charge: 100rs" : "Takeaway selected"}`);
 
-        // Reset form without refreshing
         setName("");
         setPhone("");
         setAddress("");
@@ -79,7 +78,6 @@ export const MedicineOrder = () => {
                         required
                     />
 
-                    {/* File Upload with Text Button */}
                     <div style={{ textAlign: "left", marginTop: "10px", display: "flex", alignItems: "center" }}>
                         <Button
                             component="label"
@@ -104,7 +102,7 @@ export const MedicineOrder = () => {
                     </div>
 
                     <Typography variant="caption" display="block" gutterBottom>
-                        Upload Doctor's Prescription (Required)
+                        Upload Doctor Prescription (Required)
                     </Typography>
 
                     <FormControlLabel

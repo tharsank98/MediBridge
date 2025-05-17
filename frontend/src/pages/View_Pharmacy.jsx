@@ -14,7 +14,7 @@ export const View_Pharmacy = () => {
     const dummyMedicines = [
         { id: 1, name: "Paracetamol", expiryDate: "2026-01-01", price: 5.99, pharmacy: "City Pharmacy", image: "https://via.placeholder.com/150" },
         { id: 2, name: "Ibuprofen", expiryDate: "2025-07-15", price: 8.49, pharmacy: "City Pharmacy", image: "https://via.placeholder.com/150" },
-        { id: 3, name: "Vitamin C", expiryDate: "2026-11-20", price: 12.00, pharmacy: "Sunrise Pharmacy", image: "https://via.placeholder.com/150" },
+        { id: 3, name: "Vitamin C", expiryDate: "2026-11-20", price: 11.00, pharmacy: "Sunrise Pharmacy", image: "https://via.placeholder.com/150" },
         { id: 4, name: "Amoxicillin", expiryDate: "2024-12-10", price: 15.75, pharmacy: "Green Valley Pharmacy", image: "https://via.placeholder.com/150" },
         { id: 5, name: "Cetirizine", expiryDate: "2025-03-30", price: 6.25, pharmacy: "Sunrise Pharmacy", image: "https://via.placeholder.com/150" },
     ];
@@ -99,7 +99,7 @@ export const View_Pharmacy = () => {
                                 {medicine.name}
                             </Typography>
                             <Typography color="textSecondary">Expiry Date: {medicine.expiryDate}</Typography>
-                            <Typography color="textSecondary">Price: ${medicine.price}</Typography>
+                            <Typography color="textSecondary">Price: Rs{medicine.price}</Typography>
                         </CardContent>
                         <CardActions style={{ justifyContent: "space-between" }}>
                             <div style={{ display: "flex", alignItems: "center" }}>

@@ -6,8 +6,8 @@ import { Link } from "react-router-dom";
 
 const CartPage = () => {
     const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem("cart") || "[]"));
-    const [quantities, setQuantities] = useState({});  // No type annotation needed in JS
-    const [deliveryOption, setDeliveryOption] = useState("takeaway"); // "takeaway" or "delivery"
+    const [quantities, setQuantities] = useState({});  
+    const [deliveryOption, setDeliveryOption] = useState("takeaway"); 
 
     useEffect(() => {
         setQuantities(cart.reduce((acc, item) => {
