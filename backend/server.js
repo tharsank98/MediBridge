@@ -6,6 +6,9 @@ import connectCloudinary from './config/cloudinary.js'
 import adminRouter from './routes/adminRoute.js'
 import doctorRouter from './routes/doctorRoute.js'
 import userRouter from './routes/userRouter.js'
+import productRoutes from './routes/productRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js';
+import prescriptionRoutes from './routes/prescriptionRoutes.js';
 
 
 // Initialize database and Cloudinary connections
@@ -24,6 +27,9 @@ app.use(cors()); // Enable CORS for all routes
 app.use('/api/admin', adminRouter) // Admin routes
 app.use('/api/doctor',doctorRouter)
 app.use('/api/user',userRouter)
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/prescriptions', prescriptionRoutes);
 
 
 // Root endpoint
